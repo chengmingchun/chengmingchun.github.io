@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+    <title>神威空间</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#000084" />
+    <link rel="icon" href="../favicon.ico">
+    <link rel="canonical" href="">
+    <style>
+        .hasJax{
+        font: inherit;
+        font-size: 100%;
+        background: inherit;
+        border: inherit;
+         
+    } 
+    </style>
+    
+    
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"></button>
+            <a class="brand" href="">神威空间</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    
+                    
+                        
+                            <li>
+                                <a href="../about/">
+                                    
+                                    <span>个人简历</span>
+                                </a>
+                            </li>
+                        
+                    
+                        
+                            <li>
+                                <a href="../post/">
+                                    
+                                    <span>文章</span>
+                                </a>
+                            </li>
+                        
+                    
+                        
+                            <li>
+                                <a href="../post/">
+                                    
+                                    <span>demo</span>
+                                </a>
+                            </li>
+                        
+                    
+                        
+                            <li>
+                                <a href="../post/">
+                                    
+                                    <span>照片墙</span>
+                                </a>
+                            </li>
+                        
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav><div id="content" class="container">
+
+<div class="row-fluid navmargin" style="background-color: white; padding:2%;color: black;">
+    <div class="page-header">
+        <h1>仓储论 - Thu, Aug 27, 2020</h1>
+    </div>
+    <p class="lead" style="color: #000;">欢迎阅读仓储论</p>
+    <p>将存储过程看作一个系统。里面的要素有时间（t）、需求（D）、成本（固定成本A，生产成本c，持有库存成本h）和库存订单（Q）。其中的输入变量是需求，变量是时间和成本，而输出变量是订单。</p>
+<p>即如何在给定的时间和成本条件下，满足需求且成本最小化。</p>
+<p>一般来说，库存模型分为确定且平稳，确定且随时间变化；随机且平稳，随机且随时间变化。(区分标准分别是平均数$\overline x$，变异系数$V$)</p>
+<h2 id="b确定型存储论模型b"><!-- raw HTML omitted -->确定型存储论模型<!-- raw HTML omitted --></h2>
+<h3 id="b带折扣的eoq模型b"><!-- raw HTML omitted -->带折扣的EOQ模型<!-- raw HTML omitted --></h3>
+<!-- raw HTML omitted -->
+<p>分段价格的EOQ模型也叫带折扣的EOQ模型，当订货数量y超过某个给定上限q时，库存货物可以按照折扣购买。即：
+$$
+\begin{cases}c_1,若y\leq q \ c_2,若y&gt;q\end{cases},c_1&gt;c_2
+$$
+通过标准模型可以得到每单位的采购费用</p>
+<h4 id="增量折扣">增量折扣</h4>
+<p>增量折扣本质上和全量折扣差不多，但是在公式计算时用的是可变单位成本，很好理解，因为跨区间时，每单位的成本时不一样的。计算如下
+$$
+c_i = \frac{b_1 c_1+(b2-b1)c_2+&hellip;(Q-b_n)c_n}{Q}
+$$</p>
+<p>其具体推导过程如下图示：</p>
+<p><img src="https://i.loli.net/2020/03/20/igw792a8bOsBKJl.png" alt="image-20200320100445529.png"></p>
+<h3 id="b动态价格的eoq模型b"><!-- raw HTML omitted -->动态价格的EOQ模型<!-- raw HTML omitted --></h3>
+<!-- raw HTML omitted -->
+<p>这种情况下，为了满足某一周期的需求，我们只能通过用库存去满足，或者用生产去满足</p>
+<h4 id="动态规划方法">动态规划方法</h4>
+<p>一般不用动态规划的方法，写起来太麻烦了，转而采用Wagner-Whitin方法，在随机型库存时会更多的介绍原生动态规划方法。</p>
+<h4 id="wagner-whitin方法">Wagner-Whitin方法</h4>
+<blockquote>
+<p>Wagner-Whitin是一种简化后的动态规划方法，描述起来说是横向广度的</p>
+</blockquote>
+<p>按照动态规划的思想就是算每一个周期的成本，包括本周期生产的成本，上一周期生产本周期的成本、上上周期生产的成本&hellip;.然后取其小者作为生产策略，并作为总体策略的一部分对下一周期产生影响。</p>
+<p>计算公式则和标准EOQ类似
+$$
+c_iD_i+A_i+Z_{i-1}^*
+$$
+以$Z_3$为例(注意，这里举例用的单位生产成本是固定的)，计算应该是</p>
+<p>$$
+Z_3^* = min \begin{cases} A_1+h_1D_2+(h_1+h_2)D_3 \ Z_1^*+A_2+h_2D_3 \ Z_2^*+A_3\end{cases}
+$$</p>
+<p>给出一道例题的计算如下</p>
+<p><!-- raw HTML omitted --></p>
+<h4 id="slive-meal方法">Slive-Meal方法</h4>
+<blockquote>
+<p>Slive-Meal是一种启发式的算法，这种算法得到的答案可能是非最优的，描述起来说是横向深度的。</p>
+</blockquote>
+<p>使用这种方法有一个要求：每个周期的单位生产成本是相同的，即单位生产成本是稳态的。</p>
+<p>这种方法和前面的方法思路上差不多，不过计算的是平均成本。</p>
+<p>计算方法是从第一周期开始计算生产本周，生产下一个周期，下下个周期的单位生产成本&hellip;..直到出现局部最小成本点，然后从局部最小点后一周期再开始循环。</p>
+<p>具体计算公式有
+$$
+J_1 = min{\frac{A_1}{D_1},\frac{A_1+h_1D_2}{D_1+D_2},\frac{A_1+h_1(D_2+D_3)+h_2D_3}{D_1+D_2+D_3}&hellip;}
+$$
+或者
+$$
+J_1 = min{\frac{A_1}{1}+\frac{A_1+h_1D_2}{2}+\frac{A_1+h_1(D_2+D_3)+h_2D_3}{3}&hellip;}
+$$</p>
+<blockquote>
+<p>注意这种方法是对第一个式子的极限逼近，更加草率了点</p>
+</blockquote>
+<p>上一pa的例题求解如下所示</p>
+<p><!-- raw HTML omitted --></p>
+<h2 id="随机型eoq模型">随机型EOQ模型</h2>
+<!-- raw HTML omitted -->
+<h3 id="连续盘点模型">连续盘点模型</h3>
+<h4 id="概率化的eoq模型">概率化的EOQ模型</h4>
+<blockquote>
+<p>L = 发出订单到收货期间的提前时间</p>
+<p>$x_L$ = 提前时间内的需求随机变量</p>
+<p>$\mu_L$ = 提前时间内的平均需求</p>
+<p>$\sigma_L$ = 提前时间内需求的标准差</p>
+<p>B = 缓冲库存规模</p>
+<p>$\alpha$ = 提前时间期间内用完库存的最大允许概率</p>
+</blockquote>
+<p>假定提前时间期间L的需求$x_L$服从$\mu_L$和$\sigma_L$为参数的正态分布$N(\mu_L,\sigma_L)$</p>
+<h3 id="周期盘点模型">周期盘点模型</h3>
+<h4 id="单周期模型">单周期模型</h4>
+<h5 id="报童模型">报童模型</h5>
+<h4 id="双周期模型">双周期模型</h4>
+<p><!-- raw HTML omitted --><!-- raw HTML omitted -->参考资料:运筹学导论第十章、存储论相关视频<!-- raw HTML omitted --><!-- raw HTML omitted --></p>
+
+    <h4><a href=""></a></h4>
+</div>
+
+
+        </div><footer class="container">
+    <hr class="soften">
+    <p>
+
+    <a href="https://gitlab.com/maxlefou/hugo.386">theme by Max le Fou</a> | 
+
+&copy; 
+<a href="%20" target="_blank">
+    cmc
+</a>
+<span id="thisyear">2020</span>
+
+    | waiting
+
+
+        |  <a href="//gohugo.io" target="_blank">Hugo</a>
+</p>
+    <p class="text-center">
+        
+        
+        
+        <a href="https://github.com/chengmingchun?tab=repositories">GitHub</a> 
+        <a href="https://gitee.com/chengmingchun">Gitee</a>
+    </p>
+</footer>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+            displayMath: [['$$','$$'], ['\[','\]']],
+            processEscapes: true,
+            processEnvironments: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+            TeX: {
+                equationNumbers: { autoNumber: "AMS" },
+                extensions: ["AMSmath.js", "AMSsymbols.js"]
+            }
+        }
+    });
+</script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script></body><link rel="stylesheet" href="../css/bootstrap.css">
+<link rel="stylesheet" href="../css/bootstrap-responsive.css">
+<link rel="stylesheet" href="../css/style.css">
+
+<script src="../js/jquery.js"></script>
+<script src="../js/bootstrap-386.js"></script>
+<script src="../js/bootstrap-transition.js"></script>
+<script src="../js/bootstrap-alert.js"></script>
+<script src="../js/bootstrap-modal.js"></script>
+<script src="../js/bootstrap-dropdown.js"></script>
+<script src="../js/bootstrap-scrollspy.js"></script>
+<script src="../js/bootstrap-tab.js"></script>
+<script src="../js/bootstrap-tooltip.js"></script>
+<script src="../js/bootstrap-popover.js"></script>
+<script src="../js/bootstrap-button.js"></script>
+<script src="../js/bootstrap-collapse.js"></script>
+<script src="../js/bootstrap-carousel.js"></script>
+<script src="../js/bootstrap-typeahead.js"></script>
+<script src="../js/bootstrap-affix.js"></script>
+<script>
+    _386 = { 
+        fastLoad: false ,
+        onePass: true , 
+        speedFactor: 4 
+    };
+
+    
+    function ThisYear() {
+        document.getElementById('thisyear').innerHTML = new Date().getFullYear();
+    };
+</script></html>

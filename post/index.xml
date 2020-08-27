@@ -6,17 +6,72 @@
     <description>Recent content in Posts on 神威空间</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 27 Aug 2020 17:01:03 +0800</lastBuildDate>
+    <lastBuildDate>Thu, 27 Aug 2020 22:15:51 +0800</lastBuildDate>
     
 	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
+      <title>About_yesterday</title>
+      <link>/post/about_yesterday.html</link>
+      <pubDate>Thu, 27 Aug 2020 22:15:51 +0800</pubDate>
+      
+      <guid>/post/about_yesterday.html</guid>
+      <description>I chose this essay as my topic, because it&amp;rsquo;s just too charming for me , the author is so familiar to the words that he can easily make his memory emerge into my sight with vivid and subtle sentences.
+As to the questions casted, my answer and analysis will orient towards directions as follows: 1. the landscape plainly implicate the changes caused by time. 2. the landscape also reinforce the fine sentiment beneath the prosaic words.</description>
+    </item>
+    
+    <item>
+      <title>仓储论</title>
+      <link>/post/%E4%BB%93%E5%82%A8%E8%AE%BA.html</link>
+      <pubDate>Thu, 27 Aug 2020 22:12:13 +0800</pubDate>
+      
+      <guid>/post/%E4%BB%93%E5%82%A8%E8%AE%BA.html</guid>
+      <description>将存储过程看作一个系统。里面的要素有时间（t）、需求（D）、成本（固定成本A，生产成本c，持有库存成本h）和库存订单（Q）。其中的输入变量是需求，变量是时间和成本，而输出变量是订单。
+即如何在给定的时间和成本条件下，满足需求且成本最小化。
+一般来说，库存模型分为确定且平稳，确定且随时间变化；随机且平稳，随机且随时间变化。(区分标准分别是平均数$\overline x$，变异系数$V$)
+确定型存储论模型 带折扣的EOQ模型 分段价格的EOQ模型也叫带折扣的EOQ模型，当订货数量y超过某个给定上限q时，库存货物可以按照折扣购买。即： $$ \begin{cases}c_1,若y\leq q \ c_2,若y&amp;gt;q\end{cases},c_1&amp;gt;c_2 $$ 通过标准模型可以得到每单位的采购费用
+增量折扣 增量折扣本质上和全量折扣差不多，但是在公式计算时用的是可变单位成本，很好理解，因为跨区间时，每单位的成本时不一样的。计算如下 $$ c_i = \frac{b_1 c_1+(b2-b1)c_2+&amp;hellip;(Q-b_n)c_n}{Q} $$
+其具体推导过程如下图示：
+动态价格的EOQ模型 这种情况下，为了满足某一周期的需求，我们只能通过用库存去满足，或者用生产去满足
+动态规划方法 一般不用动态规划的方法，写起来太麻烦了，转而采用Wagner-Whitin方法，在随机型库存时会更多的介绍原生动态规划方法。
+Wagner-Whitin方法  Wagner-Whitin是一种简化后的动态规划方法，描述起来说是横向广度的
+ 按照动态规划的思想就是算每一个周期的成本，包括本周期生产的成本，上一周期生产本周期的成本、上上周期生产的成本&amp;hellip;.然后取其小者作为生产策略，并作为总体策略的一部分对下一周期产生影响。
+计算公式则和标准EOQ类似 $$ c_iD_i+A_i+Z_{i-1}^* $$ 以$Z_3$为例(注意，这里举例用的单位生产成本是固定的)，计算应该是
+$$ Z_3^* = min \begin{cases} A_1+h_1D_2+(h_1+h_2)D_3 \ Z_1^*+A_2+h_2D_3 \ Z_2^*+A_3\end{cases} $$
+给出一道例题的计算如下
+Slive-Meal方法  Slive-Meal是一种启发式的算法，这种算法得到的答案可能是非最优的，描述起来说是横向深度的。
+ 使用这种方法有一个要求：每个周期的单位生产成本是相同的，即单位生产成本是稳态的。
+这种方法和前面的方法思路上差不多，不过计算的是平均成本。
+计算方法是从第一周期开始计算生产本周，生产下一个周期，下下个周期的单位生产成本&amp;hellip;..直到出现局部最小成本点，然后从局部最小点后一周期再开始循环。
+具体计算公式有 $$ J_1 = min{\frac{A_1}{D_1},\frac{A_1+h_1D_2}{D_1+D_2},\frac{A_1+h_1(D_2+D_3)+h_2D_3}{D_1+D_2+D_3}&amp;hellip;} $$ 或者 $$ J_1 = min{\frac{A_1}{1}+\frac{A_1+h_1D_2}{2}+\frac{A_1+h_1(D_2+D_3)+h_2D_3}{3}&amp;hellip;} $$
+ 注意这种方法是对第一个式子的极限逼近，更加草率了点</description>
+    </item>
+    
+    <item>
+      <title>Lingo上手攻略</title>
+      <link>/post/lingo%E4%B8%8A%E6%89%8B%E6%94%BB%E7%95%A5.html</link>
+      <pubDate>Thu, 27 Aug 2020 22:10:55 +0800</pubDate>
+      
+      <guid>/post/lingo%E4%B8%8A%E6%89%8B%E6%94%BB%E7%95%A5.html</guid>
+      <description>Lingo速上手攻略 [toc]
+核心思想 lingo引入了集合（set）概念，集合是这一组相关的对象构成的组合，代表模型中的实际事物。集合的事先声明包括集合的名称、集合的要素、集合的属性，形如WH/W1..W6/:AI
+多个基本集合可以通过Links(WH,VD):C,X的方式组成一个衍生集合，衍生集合如果没有指定衍生的成员，将会取所有可能的组合
+lingo中数据段的定义是通过DATA: ENDDATA来实现一直变量的赋值的。
+基本语法 @sum(s:e)求和函数，括号里面填写求和的集合名称（表示对这些成员进行）和表达式（表示对该表达式进行），以:做分割。如果参与运算的属性来自同一个集合，则索引符号可以省略。
+@for(s:e)循环函数,括号填写同上。如果参与运算的属性来自同一个集合，则索引符号可以省略。
+@size(s) 返回成员个数
+@warp(I,N) 返回在I&amp;ndash;N之间的数，(如果I$\gt$ N则返回 I-N*K , $\forall$ K)
+@index(s:ek) 返回ek元素在s中的顺序号
+常用功能 实例  okay,来看一个实例   首先建立模型，$min Z=\sum\sum c_{ij} x_{ij}$于是有 $s.t. \begin{cases}\sum x_{ij}&amp;lt; a_i,i=1&amp;hellip;6\ \sum_{i =1}^6 x_{ij} = d_{j}\ x_{ij}&amp;gt; 0\end{cases}$在lingo中求解如下MODEL: SETS: WH/W1..W6/:AI; VD/V1..V8/:DJ; LINKS(WH,VD):C,X; ENDSETS DATA: AI = 60,55,51,43,41,52; DJ = 35,37,22,32,41,32,43,28; C = 6,2,6,7,4,2,5,9 4,9,5,3,8,5,8,2 5,2,1,9,7,4,3,3 7,6,7,3,9,2,7,1 2,3,9,5,7,2,6,5 5,5,2,2,8,1,4,3; ENDDATA MIN=@SUM(LINKS(I,J):C(I,J)*X(I,J)); ！@SUM(LINKS:C*X); @FOR(WH(I):@SUM(VD(J):X(I,J))&amp;lt;=AI(I)); @FOR(VD(J):@SUM(WH(I):X(I,J))= DJ(J)); END 周一到周日安排x(i)个人上班，周一上班的人周六周日肯定在休息，以此类推，即周一除了周二和周三开始上班的人都在上班&amp;hellip;</description>
+    </item>
+    
+    <item>
       <title>实习小结</title>
-      <link>/post/%E5%AE%9E%E4%B9%A0%E5%AD%A6%E5%88%B0%E7%9A%84%E4%B8%9C%E8%A5%BF.html</link>
+      <link>/post/%E5%AE%9E%E4%B9%A0%E5%B0%8F%E7%BB%93.html</link>
       <pubDate>Thu, 27 Aug 2020 17:01:03 +0800</pubDate>
       
-      <guid>/post/%E5%AE%9E%E4%B9%A0%E5%AD%A6%E5%88%B0%E7%9A%84%E4%B8%9C%E8%A5%BF.html</guid>
+      <guid>/post/%E5%AE%9E%E4%B9%A0%E5%B0%8F%E7%BB%93.html</guid>
       <description>Promise 主要解决回调地狱，状态pending resolved rejected
 const newPromise = new Promise((resolve,reject) =&amp;gt; { //pending阶段要做的事，同步执行  //判断如何通向resovle或reject状态，从而异步执行resovle(data)或reject(error) }); newPromise.then( (data) =&amp;gt; { 当newPromise的状态变成fulfilled后，该函数立即执行 这里写通向fulfilled状态后要做的事情 }, (error) =&amp;gt; { 当newPromise的状态变成rejected后，该函数立即执行 这里写通向rejected状态后要做的事情 } ); async 位于函数字面量或函数表达式的前面，被修饰函数执行后会返回一个promise对象
 async function chloe(){ console.log(&amp;#39;chloe&amp;#39;); return 20; } // ======== 等价于 function chloe(){ return new Promise((resolve,reject)=&amp;gt;{ console.log(&amp;#39;chole&amp;#39;); resolve(20); }) } await 位于async函数内部，一般位于promise对象之前，会拿到该对象的结果，即resolve 和 reject的参数，如果不是promise对象则会用Promise.resolve包装后返回对应的值。会强制等待至拿到结果
@@ -32,7 +87,12 @@ async function chloe(){ console.log(&amp;#39;chloe&amp;#39;); return 20; } async
       <description>上次学生机到期后，发现有个博客真香，加上自己接触了新的框架知识，想着自己从头写一个博客系统，结果意外发现这个很好玩的博客主题，于是目标成了在这个主题的基础上做一些其他的网页来完善它，同时可以记录自己未来学习生活遇到的问题和产生的新的想法。
 目前只针对样式进行了一些改观，把原来刺眼的和看起来不太舒服的样式表都改掉了
 接下来需要完成的东西有
- 照片墙，打算用vue和element-ui 进行设计 侧边栏，仿照老式qq设计一个好康的侧边栏 leetcode的题解 以前博客文章的整理再上传 一些静态页面的部署（因为使用giteepages托管的）  </description>
+  以前博客文章的整理再上传
+  照片墙，记录自己用单反拍的照片之类的，打算用vue和element-ui 进行设计
+  侧边栏，仿照老式qq设计一个好康的侧边栏
+  leetcode的题解
+  一些静态页面的部署（因为使用giteepages托管的）
+  </description>
     </item>
     
   </channel>

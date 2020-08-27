@@ -8,6 +8,15 @@
     <meta name="theme-color" content="#000084" />
     <link rel="icon" href="../favicon.ico">
     <link rel="canonical" href="">
+    <style>
+        .hasJax{
+        font: inherit;
+        font-size: 100%;
+        background: inherit;
+        border: inherit;
+         
+    } 
+    </style>
     
     
 </head>
@@ -72,11 +81,21 @@
 <p>目前只针对样式进行了一些改观，把原来刺眼的和看起来不太舒服的样式表都改掉了</p>
 <p>接下来需要完成的东西有</p>
 <ul>
-<li><input disabled="" type="checkbox"> 照片墙，打算用vue和element-ui 进行设计</li>
-<li><input disabled="" type="checkbox"> 侧边栏，仿照老式qq设计一个好康的侧边栏</li>
-<li><input disabled="" type="checkbox"> leetcode的题解</li>
-<li><input disabled="" type="checkbox"> 以前博客文章的整理再上传</li>
-<li><input disabled="" type="checkbox"> 一些静态页面的部署（因为使用giteepages托管的）</li>
+<li>
+<p><input disabled="" type="checkbox"> 以前博客文章的整理再上传</p>
+</li>
+<li>
+<p><input disabled="" type="checkbox"> 照片墙，记录自己用单反拍的照片之类的，打算用vue和element-ui 进行设计</p>
+</li>
+<li>
+<p><input disabled="" type="checkbox"> 侧边栏，仿照老式qq设计一个好康的侧边栏</p>
+</li>
+<li>
+<p><input disabled="" type="checkbox"> leetcode的题解</p>
+</li>
+<li>
+<p><input disabled="" type="checkbox"> 一些静态页面的部署（因为使用giteepages托管的）</p>
+</li>
 </ul>
 
     <h4><a href=""></a></h4>
@@ -104,12 +123,27 @@
         
         
         
-        <a href="%20">GitHub</a> 
-        <a href="https://gitee.com/cheng-mingchun">Gitee</a>
+        <a href="https://github.com/chengmingchun?tab=repositories">GitHub</a> 
+        <a href="https://gitee.com/chengmingchun">Gitee</a>
     </p>
 </footer>
 
-</body><link rel="stylesheet" href="../css/bootstrap.css">
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        tex2jax: {
+            inlineMath: [['$','$'], ['\\(','\\)']],
+            displayMath: [['$$','$$'], ['\[','\]']],
+            processEscapes: true,
+            processEnvironments: true,
+            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+            TeX: {
+                equationNumbers: { autoNumber: "AMS" },
+                extensions: ["AMSmath.js", "AMSsymbols.js"]
+            }
+        }
+    });
+</script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script></body><link rel="stylesheet" href="../css/bootstrap.css">
 <link rel="stylesheet" href="../css/bootstrap-responsive.css">
 <link rel="stylesheet" href="../css/style.css">
 
