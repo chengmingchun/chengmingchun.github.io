@@ -1,6 +1,41 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head>
     <title>神威空间</title>
+    <script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,15 +43,6 @@
     <meta name="theme-color" content="#000084" />
     <link rel="icon" href="../favicon.ico">
     <link rel="canonical" href="">
-    <style>
-        .hasJax{
-        font: inherit;
-        font-size: 100%;
-        background: inherit;
-        border: inherit;
-         
-    } 
-    </style>
     
     
 </head>
@@ -85,7 +111,7 @@
 <!-- raw HTML omitted -->
 <p>分段价格的EOQ模型也叫带折扣的EOQ模型，当订货数量y超过某个给定上限q时，库存货物可以按照折扣购买。即：
 $$
-\begin{cases}c_1,若y\leq q \ c_2,若y&gt;q\end{cases},c_1&gt;c_2
+\begin{cases}c_1,若y\leq q ;\ c_2,若y&gt;q\end{cases},c_1&gt;c_2
 $$
 通过标准模型可以得到每单位的采购费用</p>
 <h4 id="增量折扣">增量折扣</h4>
@@ -111,7 +137,7 @@ c_iD_i+A_i+Z_{i-1}^*
 $$
 以$Z_3$为例(注意，这里举例用的单位生产成本是固定的)，计算应该是</p>
 <p>$$
-Z_3^* = min \begin{cases} A_1+h_1D_2+(h_1+h_2)D_3 \ Z_1^*+A_2+h_2D_3 \ Z_2^*+A_3\end{cases}
+Z_3^* = min \begin{cases} A_1+h_1D_2+(h_1+h_2)D_3; \ Z_1^*+A_2+h_2D_3; \ Z_2^*+A_3\end{cases}
 $$</p>
 <p>给出一道例题的计算如下</p>
 <p><!-- raw HTML omitted --></p>
@@ -184,22 +210,7 @@ $$</p>
     </p>
 </footer>
 
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [['$','$'], ['\\(','\\)']],
-            displayMath: [['$$','$$'], ['\[','\]']],
-            processEscapes: true,
-            processEnvironments: true,
-            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-            TeX: {
-                equationNumbers: { autoNumber: "AMS" },
-                extensions: ["AMSmath.js", "AMSsymbols.js"]
-            }
-        }
-    });
-</script>
-<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script></body><link rel="stylesheet" href="../css/bootstrap.css">
+</body><link rel="stylesheet" href="../css/bootstrap.css">
 <link rel="stylesheet" href="../css/bootstrap-responsive.css">
 <link rel="stylesheet" href="../css/style.css">
 

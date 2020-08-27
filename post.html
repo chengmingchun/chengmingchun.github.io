@@ -1,6 +1,41 @@
 <!DOCTYPE html>
 <html lang="zh-CN"><head>
     <title>神威空间</title>
+    <script type="text/javascript"
+        async
+        src="https://cdn.bootcss.com/mathjax/2.7.3/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [['$','$'], ['\\(','\\)']],
+    displayMath: [['$$','$$'], ['\[\[','\]\]']],
+    processEscapes: true,
+    processEnvironments: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+    TeX: { equationNumbers: { autoNumber: "AMS" },
+         extensions: ["AMSmath.js", "AMSsymbols.js"] }
+  }
+});
+
+MathJax.Hub.Queue(function() {
+    
+    
+    
+    var all = MathJax.Hub.getAllJax(), i;
+    for(i = 0; i < all.length; i += 1) {
+        all[i].SourceElement().parentNode.className += ' has-jax';
+    }
+});
+</script>
+
+<style>
+code.has-jax {
+    font: inherit;
+    font-size: 100%;
+    background: inherit;
+    border: inherit;
+    color: #515151;
+}
+</style>
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,15 +43,6 @@
     <meta name="theme-color" content="#000084" />
     <link rel="icon" href="./favicon.ico">
     <link rel="canonical" href="">
-    <style>
-        .hasJax{
-        font: inherit;
-        font-size: 100%;
-        background: inherit;
-        border: inherit;
-         
-    } 
-    </style>
     
     
 </head>
@@ -82,6 +108,14 @@
 
 
     <li>
+        <a href="./post/%E9%B1%BC%E7%BE%A4%E7%AE%97%E6%B3%95%E6%B1%82%E8%A7%A3%E7%BB%84%E7%8E%AF%E9%97%AE%E9%A2%98.html">2020-08-28 | 鱼群算法求解顺丰比赛问题</a>
+    </li>
+
+    <li>
+        <a href="./post/js%E9%BB%91%E7%99%BD%E6%A3%8B.html">2020-08-28 | Js黑白棋</a>
+    </li>
+
+    <li>
         <a href="./post/about_yesterday.html">2020-08-27 | About_yesterday</a>
     </li>
 
@@ -129,22 +163,7 @@
     </p>
 </footer>
 
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        tex2jax: {
-            inlineMath: [['$','$'], ['\\(','\\)']],
-            displayMath: [['$$','$$'], ['\[','\]']],
-            processEscapes: true,
-            processEnvironments: true,
-            skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
-            TeX: {
-                equationNumbers: { autoNumber: "AMS" },
-                extensions: ["AMSmath.js", "AMSsymbols.js"]
-            }
-        }
-    });
-</script>
-<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"></script></body><link rel="stylesheet" href="./css/bootstrap.css">
+</body><link rel="stylesheet" href="./css/bootstrap.css">
 <link rel="stylesheet" href="./css/bootstrap-responsive.css">
 <link rel="stylesheet" href="./css/style.css">
 
