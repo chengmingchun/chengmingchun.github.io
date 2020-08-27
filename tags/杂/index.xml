@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>杂 on 神威空间</title>
+    <link>/tags/%E6%9D%82.html</link>
+    <description>Recent content in 杂 on 神威空间</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 27 Aug 2020 15:32:46 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E6%9D%82/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>博客说明</title>
+      <link>/post/%E5%8D%9A%E5%AE%A2%E8%AF%B4%E6%98%8E.html</link>
+      <pubDate>Thu, 27 Aug 2020 15:32:46 +0800</pubDate>
+      
+      <guid>/post/%E5%8D%9A%E5%AE%A2%E8%AF%B4%E6%98%8E.html</guid>
+      <description>上次学生机到期后，发现有个博客真香，加上自己接触了新的框架知识，想着自己从头写一个博客系统，结果意外发现这个很好玩的博客主题，于是目标成了在这个主题的基础上做一些其他的网页来完善它，同时可以记录自己未来学习生活遇到的问题和产生的新的想法。
+目前只针对样式进行了一些改观，把原来刺眼的和看起来不太舒服的样式表都改掉了
+接下来需要完成的东西有
+ 照片墙，打算用vue和element-ui 进行设计 侧边栏，仿照老式qq设计一个好康的侧边栏 leetcode的题解 以前博客文章的整理再上传 一些静态页面的部署（因为使用giteepages托管的）  </description>
+    </item>
+    
+  </channel>
+</rss>

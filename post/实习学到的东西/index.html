@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+    <title>神威空间</title>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#000084" />
+    <link rel="icon" href="/favicon.ico">
+    <link rel="canonical" href="">
+    
+    
+</head>
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"></button>
+            <a class="brand" href="">神威空间</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    
+                    
+                        
+                            <li>
+                                <a href="/about/">
+                                    
+                                    <span>个人简历</span>
+                                </a>
+                            </li>
+                        
+                    
+                        
+                            <li>
+                                <a href="/post/">
+                                    
+                                    <span>文章</span>
+                                </a>
+                            </li>
+                        
+                    
+                        
+                            <li>
+                                <a href="/post/">
+                                    
+                                    <span>demo</span>
+                                </a>
+                            </li>
+                        
+                    
+                        
+                            <li>
+                                <a href="/post/">
+                                    
+                                    <span>照片墙</span>
+                                </a>
+                            </li>
+                        
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav><div id="content" class="container">
+
+<div class="row-fluid navmargin" style="background-color: white; padding:2%;color: black;">
+    <div class="page-header">
+        <h1>实习小结 - Thu, Aug 27, 2020</h1>
+    </div>
+    <p class="lead" style="color: #000;">欢迎阅读实习小结</p>
+    <h2 id="promise">Promise</h2>
+<p>主要解决回调地狱，状态<code>pending</code> <code>resolved</code> <code>rejected</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">newPromise</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> Promise((<span style="color:#a6e22e">resolve</span>,<span style="color:#a6e22e">reject</span>) =&gt; {
+    <span style="color:#75715e">//pending阶段要做的事，同步执行
+</span><span style="color:#75715e"></span>    <span style="color:#75715e">//判断如何通向resovle或reject状态，从而异步执行resovle(data)或reject(error)
+</span><span style="color:#75715e"></span>});
+<span style="color:#a6e22e">newPromise</span>.<span style="color:#a6e22e">then</span>(
+ (<span style="color:#a6e22e">data</span>) =&gt; {
+        <span style="color:#a6e22e">当newPromise的状态变成fulfilled后</span><span style="color:#960050;background-color:#1e0010">，</span><span style="color:#a6e22e">该函数立即执行</span>
+        <span style="color:#a6e22e">这里写通向fulfilled状态后要做的事情</span>
+    },
+  (<span style="color:#a6e22e">error</span>) =&gt; {
+        <span style="color:#a6e22e">当newPromise的状态变成rejected后</span><span style="color:#960050;background-color:#1e0010">，</span><span style="color:#a6e22e">该函数立即执行</span>
+        <span style="color:#a6e22e">这里写通向rejected状态后要做的事情</span>
+    }
+);
+</code></pre></div><h2 id="async">async</h2>
+<p>位于函数字面量或函数表达式的前面，被修饰函数执行后会返回一个promise对象</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#a6e22e">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">chloe</span>(){
+	<span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;chloe&#39;</span>);
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">20</span>;
+}
+<span style="color:#75715e">// ======== 等价于
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">function</span> <span style="color:#a6e22e">chloe</span>(){
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Promise((<span style="color:#a6e22e">resolve</span>,<span style="color:#a6e22e">reject</span>)=&gt;{
+        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;chole&#39;</span>);
+        <span style="color:#a6e22e">resolve</span>(<span style="color:#ae81ff">20</span>);
+    })
+}
+</code></pre></div><h2 id="await">await</h2>
+<p>位于async函数内部，一般位于promise对象之前，会拿到该对象的结果，即<code>resolve</code> 和 <code>reject</code>的参数，如果不是promise对象则会用<code>Promise.resolve</code>包装后返回对应的值。会强制等待至拿到结果</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#a6e22e">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">chloe</span>(){
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#39;chloe&#39;</span>);
+    <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">20</span>;
+}
+
+<span style="color:#a6e22e">async</span> <span style="color:#66d9ef">function</span> <span style="color:#a6e22e">taran</span>(){
+    <span style="color:#75715e">//chole函数执行并返回一个Promise对象，await拿到其resolve参数20
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">age</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">await</span> <span style="color:#a6e22e">chloe</span>();
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#e6db74">&#34;taran&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">age</span>);
+}
+
+<span style="color:#a6e22e">taran</span>(); <span style="color:#75715e">// chloe taran20
+</span></code></pre></div><p>Vuex</p>
+<p>vuex是vue的状态管理模式，即将需要共享的data使用vuex进行统一集中式管理</p>
+<p>vuex中有五种默认的基本对象：</p>
+<ol>
+<li>state 存储状态 使用<code>$store.state.val = xx$</code></li>
+<li>getters 对数据获取之前的再次编译，state的计算属性，使用<code>$store.getters.fun()</code></li>
+<li>mutations 修改状态，同步，使用<code>$store.commit(&quot; &quot;,params)</code></li>
+<li>actions 异步操作, 使用<code>$store.dispath(&quot; &quot;)</code></li>
+<li>modules store的子模块</li>
+</ol>
+<p>使用方法</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">import</span> <span style="color:#a6e22e">Vue</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;vue&#39;</span>
+<span style="color:#66d9ef">import</span> <span style="color:#a6e22e">Vuex</span> <span style="color:#a6e22e">from</span> <span style="color:#e6db74">&#39;vuex&#39;</span>
+
+<span style="color:#a6e22e">Vue</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">Vuex</span>)
+
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">state</span> <span style="color:#f92672">=</span> {
+    <span style="color:#a6e22e">count</span> <span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span>
+}
+
+<span style="color:#66d9ef">export</span> <span style="color:#66d9ef">default</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Vuex</span>.<span style="color:#a6e22e">Store</span>({
+    <span style="color:#a6e22e">state</span>
+})
+</code></pre></div><p>computed 用来监控自己定义的变量，该变量不在data里面声明，可以在页面上进行双向数据绑定展示出结果或者用作其他处理。比较适合多个变量或者对象进行处理后返回一个结果值。比如购物清单用computed属性来计算</p>
+<p>watch主要用来监控vue实例的变化，监控的变量必须在data里声明才可以。一般用于路由监控，input输入框的值特殊处理等一个数据影响多个数据的场景。</p>
+<p>dispatch 含有异步操作，数据提交至action，可用于向后台提交数据 <code>this.$store.dispatch(actions的方法,args)</code></p>
+<p>commit 同步操作，数据提交至mutation 可用于读取用户信息写入缓存 <code>this.$store.commit(mutations的方法,args)</code> ，使用commit提交到mutation修改state时，vuex能够记录每一次state的变化记录，保存状态快照，实现时间漫游/回滚之类的操作。</p>
+<p>若将vue创建store时开启严格模式(<code>strict:true</code>) 则对状态进行修改不经过mutation会报错 。</p>
+<h2 id="原生ajax">原生ajax</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#75715e">//创建异步对象
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">xhr</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">XMLHttpRequest</span>();
+<span style="color:#75715e">//设置请求基本信息，并加上请求头
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">setRequestHeader</span>(<span style="color:#e6db74">&#34;Content-type&#34;</span>,<span style="color:#e6db74">&#34;application/x-www-form-urlencoded&#34;</span>)
+<span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">open</span>(<span style="color:#e6db74">&#39;post&#39;</span>,<span style="color:#e6db74">&#39;test.php&#39;</span>)
+<span style="color:#75715e">//发送请求
+</span><span style="color:#75715e"></span><span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">send</span>(<span style="color:#e6db74">&#39;name = lan&amp;age = 18&#39;</span>)
+<span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">onreadystatechange</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>(){
+    <span style="color:#75715e">//判断服务器是否正确响应
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span>(<span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">readyState</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">4</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">status</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">20</span>){
+        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">xhr</span>.<span style="color:#a6e22e">responseText</span>);
+    }
+}
+</code></pre></div><h2 id="jqueryajax">jqueryAjax</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">loginBtn</span> <span style="color:#f92672">=</span> document.<span style="color:#a6e22e">getElementsByTagName</span>(<span style="color:#e6db74">&#34;button&#34;</span>)[<span style="color:#ae81ff">0</span>];
+<span style="color:#a6e22e">loginBtn</span>.<span style="color:#a6e22e">onclick</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">function</span>(){
+    <span style="color:#a6e22e">ajax</span>({
+        <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#34;post&#34;</span>;
+        <span style="color:#a6e22e">url</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#34;test.php&#34;</span>;
+        <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#34;name=lan&amp;pwd=123456&#34;</span>;
+        <span style="color:#a6e22e">success</span><span style="color:#f92672">:</span><span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">data</span>){
+        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">data</span>);
+    }
+    })
+}
+</code></pre></div><h2 id="fetch">fetch</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#a6e22e">fetch</span>(<span style="color:#e6db74">&#34;http://....&#34;</span>,{
+    <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#39;post&#39;</span>,
+    <span style="color:#a6e22e">header</span><span style="color:#f92672">:</span>{
+        <span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#39;application/x-www-form-urlencoded&#39;</span>
+    },
+    <span style="color:#a6e22e">body</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">URLSearchParams</span>([
+        [<span style="color:#e6db74">&#34;username&#34;</span>,<span style="color:#e6db74">&#34;lan&#34;</span>],[<span style="color:#e6db74">&#34;password&#34;</span>,<span style="color:#e6db74">&#34;123456&#34;</span>]
+    ]).<span style="color:#a6e22e">toString</span>()
+})
+
+.<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">res</span> =&gt;{
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">res</span>);
+    <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">res</span>.<span style="color:#a6e22e">text</span>();
+})
+.<span style="color:#a6e22e">then</span>(<span style="color:#a6e22e">data</span> =&gt;{
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">data</span>)
+})
+</code></pre></div><h2 id="axios">axios</h2>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#a6e22e">axios</span>({
+    <span style="color:#a6e22e">method</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;post&#39;</span>,
+    <span style="color:#a6e22e">url</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#39;abc/login&#39;</span>,
+    <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span>{
+        <span style="color:#a6e22e">userName</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#34;lan&#34;</span>,
+        <span style="color:#a6e22e">password</span><span style="color:#f92672">:</span><span style="color:#e6db74">&#39;123&#39;</span>
+    }
+})
+.<span style="color:#a6e22e">then</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">response</span>){
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">response</span>);
+})
+.<span style="color:#66d9ef">catch</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">error</span>){
+    <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">error</span>);
+})
+</code></pre></div>
+    <h4><a href=""></a></h4>
+</div>
+
+
+        </div><footer class="container">
+    <hr class="soften">
+    <p>
+
+    <a href="https://gitlab.com/maxlefou/hugo.386">theme by Max le Fou</a> | 
+
+&copy; 
+<a href="%20" target="_blank">
+    cmc
+</a>
+<span id="thisyear">2020</span>
+
+    | waiting
+
+
+        |  <a href="//gohugo.io" target="_blank">Hugo</a>
+</p>
+    <p class="text-center">
+        
+        
+        
+        <a href="%20">GitHub</a> 
+        <a href="https://gitee.com/cheng-mingchun">Gitee</a>
+    </p>
+</footer>
+
+</body><link rel="stylesheet" href="/css/bootstrap.css">
+<link rel="stylesheet" href="/css/bootstrap-responsive.css">
+<link rel="stylesheet" href="/css/style.css">
+
+<script src="/js/jquery.js"></script>
+<script src="/js/bootstrap-386.js"></script>
+<script src="/js/bootstrap-transition.js"></script>
+<script src="/js/bootstrap-alert.js"></script>
+<script src="/js/bootstrap-modal.js"></script>
+<script src="/js/bootstrap-dropdown.js"></script>
+<script src="/js/bootstrap-scrollspy.js"></script>
+<script src="/js/bootstrap-tab.js"></script>
+<script src="/js/bootstrap-tooltip.js"></script>
+<script src="/js/bootstrap-popover.js"></script>
+<script src="/js/bootstrap-button.js"></script>
+<script src="/js/bootstrap-collapse.js"></script>
+<script src="/js/bootstrap-carousel.js"></script>
+<script src="/js/bootstrap-typeahead.js"></script>
+<script src="/js/bootstrap-affix.js"></script>
+<script>
+    _386 = { 
+        fastLoad: false ,
+        onePass: true , 
+        speedFactor: 4 
+    };
+
+    
+    function ThisYear() {
+        document.getElementById('thisyear').innerHTML = new Date().getFullYear();
+    };
+</script></html>

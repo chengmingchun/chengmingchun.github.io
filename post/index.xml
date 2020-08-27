@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on 神威空间</title>
+    <link>/post.html</link>
+    <description>Recent content in Posts on 神威空间</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 27 Aug 2020 17:01:03 +0800</lastBuildDate>
+    
+	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>实习小结</title>
+      <link>/post/%E5%AE%9E%E4%B9%A0%E5%AD%A6%E5%88%B0%E7%9A%84%E4%B8%9C%E8%A5%BF.html</link>
+      <pubDate>Thu, 27 Aug 2020 17:01:03 +0800</pubDate>
+      
+      <guid>/post/%E5%AE%9E%E4%B9%A0%E5%AD%A6%E5%88%B0%E7%9A%84%E4%B8%9C%E8%A5%BF.html</guid>
+      <description>Promise 主要解决回调地狱，状态pending resolved rejected
+const newPromise = new Promise((resolve,reject) =&amp;gt; { //pending阶段要做的事，同步执行  //判断如何通向resovle或reject状态，从而异步执行resovle(data)或reject(error) }); newPromise.then( (data) =&amp;gt; { 当newPromise的状态变成fulfilled后，该函数立即执行 这里写通向fulfilled状态后要做的事情 }, (error) =&amp;gt; { 当newPromise的状态变成rejected后，该函数立即执行 这里写通向rejected状态后要做的事情 } ); async 位于函数字面量或函数表达式的前面，被修饰函数执行后会返回一个promise对象
+async function chloe(){ console.log(&amp;#39;chloe&amp;#39;); return 20; } // ======== 等价于 function chloe(){ return new Promise((resolve,reject)=&amp;gt;{ console.log(&amp;#39;chole&amp;#39;); resolve(20); }) } await 位于async函数内部，一般位于promise对象之前，会拿到该对象的结果，即resolve 和 reject的参数，如果不是promise对象则会用Promise.resolve包装后返回对应的值。会强制等待至拿到结果
+async function chloe(){ console.log(&amp;#39;chloe&amp;#39;); return 20; } async function taran(){ //chole函数执行并返回一个Promise对象，await拿到其resolve参数20  const age = await chloe(); console.</description>
+    </item>
+    
+    <item>
+      <title>博客说明</title>
+      <link>/post/%E5%8D%9A%E5%AE%A2%E8%AF%B4%E6%98%8E.html</link>
+      <pubDate>Thu, 27 Aug 2020 15:32:46 +0800</pubDate>
+      
+      <guid>/post/%E5%8D%9A%E5%AE%A2%E8%AF%B4%E6%98%8E.html</guid>
+      <description>上次学生机到期后，发现有个博客真香，加上自己接触了新的框架知识，想着自己从头写一个博客系统，结果意外发现这个很好玩的博客主题，于是目标成了在这个主题的基础上做一些其他的网页来完善它，同时可以记录自己未来学习生活遇到的问题和产生的新的想法。
+目前只针对样式进行了一些改观，把原来刺眼的和看起来不太舒服的样式表都改掉了
+接下来需要完成的东西有
+ 照片墙，打算用vue和element-ui 进行设计 侧边栏，仿照老式qq设计一个好康的侧边栏 leetcode的题解 以前博客文章的整理再上传 一些静态页面的部署（因为使用giteepages托管的）  </description>
+    </item>
+    
+  </channel>
+</rss>
