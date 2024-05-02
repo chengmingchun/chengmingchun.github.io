@@ -1,0 +1,32 @@
+html body {
+    margin: 0;
+}
+
+#main {
+    text-align: center;
+}
+
+#card {
+    height: 320px;
+    width: 180px;
+    border: 1px solid black;
+    margin: 40px auto;
+}
+
+#card>img {
+    max-width: 100%;
+    min-height: 100%;
+    /* transform: rotate(180deg); */
+}
+
+#drawCard {
+    /* text-align: center; */
+    margin: 0 auto;
+}
+
+#explain {
+    width: 60%;
+    height: auto;
+    border: 1px solid black;
+    margin: 20px auto;
+}
