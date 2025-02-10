@@ -1,33 +1,355 @@
 <!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
-<html>
-
+<html lang="zh-CN">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title></title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="./index.css">
-    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
-    <script src="./index.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的情人节小票</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <style>
+        body {
+            background-color: #000;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 音频隐藏 */
+        #myAudio {
+            display: none;
+        }
+
+        .printer-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            background: #666;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: slide-up 3s ease-out forwards;
+            overflow-y: auto;
+            max-height: calc(100vh - 40px);
+        }
+
+        @keyframes slide-up {
+            0% { transform: translateY(100vh); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .receipt {
+            width: 100%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            position: relative;
+            margin-top: 20px;
+            overflow-y: auto;
+            max-height: none;
+        }
+
+        .header, .footer {
+            text-align: center;
+            border-bottom: 2px dashed #000;
+            padding: 10px 0;
+        }
+
+        .story-item {
+            margin: 20px 0;
+            border-bottom: 1px dotted #ccc;
+            padding: 10px 0;
+        }
+
+        .date {
+            font-weight: bold;
+            color: #666;
+        }
+
+        /* 撕边效果 */
+        .receipt:before, .receipt:after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(45deg, transparent 33%, #000 33%, #000 66%, transparent 66%),
+                        linear-gradient(-45deg, transparent 33%, #000 33%, #000 66%, transparent 66%);
+            background-size: 20px 40px;
+        }
+
+        .receipt:before { top: -5px; }
+        .receipt:after { bottom: -5px; }
+
+        /* 打印机文字 */
+        .printer-text {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        /* 播放/暂停按钮 */
+        #playButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            background-color: #ff4081;
+            color: white;
+            border-radius: 50%;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        #playButton:hover {
+            transform: scale(1.1);
+        }
+
+        #playButton:active {
+            transform: scale(0.95);
+        }
+
+        /* 截图按钮 */
+        #screenshot-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #fff;
+            color: #ff4081;
+            border: none;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: transform 0.2s ease;
+        }
+
+        #screenshot-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 抽奖区域 */
+        .lottery {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        #lottery-btn {
+            background: #ff4081;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: transform 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #lottery-btn:active {
+            transform: scale(0.95);
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 20px;
+            color: #ff4081;
+        }
+
+        /* 彩纸效果 */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ff4081;
+            opacity: 0;
+            animation: confetti 2s ease-out;
+        }
+
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(500px) rotate(720deg); opacity: 0; }
+        }
+    </style>
 </head>
-
 <body>
-    <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-    <div id="main">
-        <div id="card">
-            <img src="./img/top.jpg" alt="">
-        </div>
-        <button id="drawCard">占卜今天的运势！</button>
-        <div id="explain"></div>
-    </div>
-    <script src="" async defer></script>
-</body>
+    <audio id="myAudio" preload="auto">
+        <source src="https://ec-sycdn.kuwo.cn/6732db6b1ae49ec2ca9cee07124139ae/67aa0bb8/resource/n1/66/52/1335486900.mp3?bitrate$128&from=vip" type="audio/mpeg">
+    </audio>
 
+    <div class="printer-container">
+        <!-- 播放/暂停按钮 -->
+        <div id="playButton">⏸️</div>
+
+        <!-- 截图按钮 -->
+        <button id="screenshot-btn">截图</button>
+
+        <div class="printer-text">
+            <h2>🖨️ 打印完成！</h2>
+            <p>       请查收哦</p>
+        </div>
+        <div class="receipt">
+            <div class="header">
+                <h2> 购物小票 </h2>
+                <p>顾客：我们</p>
+                <p>日期：从相遇那天起</p>
+            </div>
+
+            <div class="story-item">
+                <div class="date">2025.01.04</div>
+                <p>⭐ 初次相遇 </p>
+                <p>⭐ 简单的自我介绍，相识不算太过尴尬😄</p>
+            </div>
+
+            <div class="story-item">
+                <div class="date">2025.01.xx</div>
+                <p>🌙 获知超能力 </p>
+                <p>🌙 原来25岁过后就不失眠，失眠就吃氯雷他定 😴</p>
+            </div>
+            
+            <div class="story-item">
+                <div class="date">2025.01.xx</div>
+                <p>🌻 养一只向日葵 </p>
+                <p>🌻 北京的jellycat真的真的好小 🥛</p>
+            </div>
+
+            <div class="story-item">
+                <div class="date">2025.01.28</div>
+                <p>💕 第一次见面 </p>
+                <p>💕 怎么会是在早饭时间和不开门的面皮店 🙅‍</p>
+            </div>
+
+            <div class="story-item">
+                <div class="date">2025.02.01</div>
+                <p>🌟 第二次见面</p>
+                <p>🌟 桌游🎮，<del>神奇</del>出现的jellycat🧸，匆匆的结尾</p>
+            </div>
+
+            <div class="story-item">
+                <div class="date">2025.02.01</div>
+                <p>😟 缺席的生日</p>
+                <p>😟 好吃的蛋糕🎂只能看图片哦</p>
+            </div>
+            
+            <div class="story-item">
+                <div class="date">2025.03.11</div>
+                <p>💖 即将到来的生日</p>
+                <p>💖 礼物全力准备中🚆（希望人也不缺席🤔</p>
+            </div>
+
+            <div class="lottery" id="lottery-section">
+                <h3>💖 情人节抽奖 💎</h3>
+                <button id="lottery-btn">点我抽惊喜 🎁</button>
+                <div id="result"></div>
+            </div>
+
+            <div class="footer">
+                <p>细细算，相识不过月半，却总觉已有三月长</p>
+                <p>后面也要多多努力，彼此相伴，共同努力成长哦</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 获取音频和播放按钮
+        const audio = document.getElementById('myAudio');
+        const playButton = document.getElementById('playButton');
+
+        let userInteracted = false;
+
+
+        // 监听用户交互事件，设置 userInteracted 为 true
+        ['click', 'touchstart', 'keydown'].forEach(eventType => {
+            window.addEventListener(eventType, () => {
+                if (!userInteracted) {
+                    userInteracted = true;
+                    // 尝试自动播放音频
+                    audio.play().catch(error => {
+                        console.error("自动播放失败:", error);
+                    });
+                }
+            }, { once: true });
+        });
+
+        // 播放/暂停逻辑
+        playButton.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playButton.textContent = '⏸️'; // 暂停图标
+            } else {
+                audio.pause();
+                playButton.textContent = '▶️'; // 播放图标
+            }
+        });
+
+        // 截图功能
+        document.getElementById('screenshot-btn').addEventListener('click', () => {
+            html2canvas(document.querySelector('.receipt')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'screenshot.jpg';
+                link.href = canvas.toDataURL('image/jpeg');
+                link.click();
+            });
+        });
+
+        // 抽奖逻辑
+        const prizes = [
+            "给我点一杯奶茶😋",
+            "给我点一杯咖啡😋",
+            "给我点一杯牛奶😋",
+            "给我点一份水果😋",
+        ];
+
+        const lotteryBtn = document.getElementById('lottery-btn');
+        const result = document.getElementById('result');
+
+        lotteryBtn.addEventListener('click', () => {
+            // 禁用按钮防止重复点击
+            lotteryBtn.disabled = true;
+            lotteryBtn.classList.add('spinning');
+
+            // 模拟抽奖过程
+            setTimeout(() => {
+                // 停止旋转
+                lotteryBtn.classList.remove('spinning');
+
+                // 显示结果
+                result.style.display = 'block';
+                result.innerHTML = "中奖礼物：<br>" + prizes[Math.floor(Math.random() * prizes.length)];
+
+                // 添加彩纸效果
+                createConfetti();
+            }, 500); // 2秒后显示结果
+        });
+
+        // 彩纸效果
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                document.body.appendChild(confetti);
+
+                // 移除彩纸元素
+                confetti.addEventListener('animationend', () => {
+                    confetti.remove();
+                });
+            }
+        }
+    </script>
+</body>
 </html>
