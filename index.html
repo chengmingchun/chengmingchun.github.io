@@ -215,15 +215,29 @@
             </div>
 
             <div class="story-item">
-                <div class="date">2025.01.xx</div>
-                <p>🌙 获知超能力 </p>
-                <p>🌙 原来25岁过后就不失眠，失眠就吃氯雷他定 😴</p>
+                <div class="date">2025.01.16</div>
+                <p>🐻 熊喵来了 </p>
+                <p>🐻 有的人吃了火锅睡不着，有的人吃了会拉肚😷</p>
             </div>
             
             <div class="story-item">
-                <div class="date">2025.01.xx</div>
+                <div class="date">2025.01.16</div>
+                <p>🌙 获知超能力 </p>
+                <p>🌙 原来25岁过后就不失眠，失眠吃氯雷他定😴</p>
+            </div>
+
+            <div class="story-item">
+                <div class="date">2025.01.18</div>
                 <p>🌻 养一只向日葵 </p>
-                <p>🌻 北京的jellycat真的真的好小 🥛</p>
+                <p>🌻 北京的jellycat真的真的好小🥛
+                    （*仅指三里屯和国贸店 </p>
+            </div>
+
+
+            <div class="story-item">
+                <div class="date">2025.01.23</div>
+                <p>☕️ 甜蜜蜜的茶叶</p>
+                <p>☕️ 甜蜜蜜别名蜜雪冰城，但其实是一款茶叶，墨黑色的酷酷包装 📕</p>
             </div>
 
             <div class="story-item">
@@ -241,7 +255,7 @@
             <div class="story-item">
                 <div class="date">2025.02.01</div>
                 <p>😟 缺席的生日</p>
-                <p>😟 好吃的蛋糕🎂只准看图片哦</p>
+                <p>😟 好吃的蛋糕🎂只能看图片哦</p>
             </div>
             
             <div class="story-item">
@@ -251,7 +265,7 @@
             </div>
 
             <div class="lottery" id="lottery-section">
-                <h3>💖 情人节抽奖 💎</h3>
+                <h3>💴 情人节抽奖 💎</h3>
                 <button id="lottery-btn">点我抽惊喜 🎁</button>
                 <div id="result"></div>
             </div>
@@ -310,7 +324,9 @@
             "给我点一杯奶茶😋",
             "给我点一杯咖啡😋",
             "给我点一杯牛奶😋",
-            "给我点一份水果😋",
+            "给我点一杯果茶😋",
+            "给我点两杯奶茶😋",
+            "给我点两杯牛奶😋"
         ];
 
         const lotteryBtn = document.getElementById('lottery-btn');
@@ -318,7 +334,7 @@
 
         lotteryBtn.addEventListener('click', () => {
             // 禁用按钮防止重复点击
-            lotteryBtn.disabled = true;
+            // lotteryBtn.disabled = true;
             lotteryBtn.classList.add('spinning');
 
             // 模拟抽奖过程
