@@ -19,10 +19,10 @@
             min-height: 100vh;
         }
 
-        /* 音频隐藏 */
+        /* 音频隐藏
         #myAudio {
             display: none;
-        }
+        } */
 
         .printer-container {
             position: relative;
@@ -84,9 +84,13 @@
             background-size: 20px 40px;
         }
 
-        /* .receipt:before { top: -5px; }
-        .receipt:after { bottom: -5px; } */
+        .receipt:before { top: -5px; }
+        .receipt:after { bottom: -5px; }
 
+        .receipt iframe {
+            margin-top: 10px; /* 调整与标题的距离 */
+            margin-bottom: 20px; /* 调整与下方内容的距离 */
+        }
         /* 打印机文字 */
         .printer-text {
             text-align: center;
@@ -186,13 +190,14 @@
     </style>
 </head>
 <body>
-    <audio id="myAudio" preload="auto">
+
+        <!-- <audio id="myAudio" preload="auto">
         <source src="https://km-sycdn.kmplayer-music-api.sbs/08baaa6f4a963a031f980bd6a247e6b7/resource/3501346832473.ogg" type="audio/mpeg">
-    </audio>
+    </audio> -->
 
     <div class="printer-container">
-        <!-- 播放/暂停按钮 -->
-        <div id="playButton">⏸️</div>
+        <!-- 播放/暂停按钮
+        <div id="playButton">⏸️</div> -->
 
         <!-- 截图按钮 -->
         <button id="screenshot-btn">截图</button>
@@ -206,6 +211,7 @@
                 <h2> 购物小票 </h2>
                 <p>顾客：我们</p>
                 <p>日期：从相遇那天起</p>
+                <iframe  id="myAudio" frameborder="no" border="0" muted  marginwidth="0" marginheight="0" width=330 height=86 allow="autoplay" src="https://music.163.com/outchain/player?type=2&id=1303027499&auto=1&height=66"></iframe>
             </div>
 
             <div class="story-item">
@@ -266,6 +272,12 @@
             </div>
             
             <div class="story-item">
+                <div class="date">2025.02.14</div>
+                <p>🍬 甜甜的咖啡</p>
+                <p>🍬 不是因为咖啡甜，是因为你点的咖啡所以甜</p>
+            </div>
+
+            <div class="story-item">
                 <div class="date">2025.03.11</div>
                 <p>💖 即将到来的生日</p>
                 <p>💖 礼物准备中🚆（希望可以不缺席🤔</p>
@@ -286,36 +298,36 @@
     </div>
 
     <script>
-        // 获取音频和播放按钮
-        const audio = document.getElementById('myAudio');
-        const playButton = document.getElementById('playButton');
+        // // 获取音频和播放按钮
+        // const audio = document.getElementById('myAudio');
+        // const playButton = document.getElementById('playButton');
 
-        let userInteracted = false;
+        // let userInteracted = false;
 
 
-        // 监听用户交互事件，设置 userInteracted 为 true
-        ['click', 'touchstart', 'keydown'].forEach(eventType => {
-            window.addEventListener(eventType, () => {
-                if (!userInteracted) {
-                    userInteracted = true;
-                    // 尝试自动播放音频
-                    audio.play().catch(error => {
-                        console.error("自动播放失败:", error);
-                    });
-                }
-            }, { once: true });
-        });
+        // // 监听用户交互事件，设置 userInteracted 为 true
+        // ['click', 'touchstart', 'keydown'].forEach(eventType => {
+        //     window.addEventListener(eventType, () => {
+        //         if (!userInteracted) {
+        //             userInteracted = true;
+        //             // 尝试自动播放音频
+        //             audio.play().catch(error => {
+        //                 console.error("自动播放失败:", error);
+        //             });
+        //         }
+        //     }, { once: true });
+        // });
 
-        // 播放/暂停逻辑
-        playButton.addEventListener('click', () => {
-            if (audio.paused) {
-                audio.play();
-                playButton.textContent = '⏸️'; // 暂停图标
-            } else {
-                audio.pause();
-                playButton.textContent = '▶️'; // 播放图标
-            }
-        });
+        // // 播放/暂停逻辑
+        // playButton.addEventListener('click', () => {
+        //     if (audio.paused) {
+        //         audio.play();
+        //         playButton.textContent = '⏸️'; // 暂停图标
+        //     } else {
+        //         audio.pause();
+        //         playButton.textContent = '▶️'; // 播放图标
+        //     }
+        // });
 
         // 截图功能
         document.getElementById('screenshot-btn').addEventListener('click', () => {
