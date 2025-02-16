@@ -183,6 +183,58 @@
             0% { transform: translateY(0) rotate(0deg); opacity: 1; }
             100% { transform: translateY(500px) rotate(720deg); opacity: 0; }
         }
+
+        @keyframes jump {
+            0% { transform: translateY(0) scale(1.2); }
+            50% { transform: translateY(-20px) scale(1.3); }
+            100% { transform: translateY(0) scale(1.2); }
+        }
+       
+        .proposal {
+            text-align: center;
+            padding: 30px 0;
+            border-top: 2px dashed #ff4081;
+            margin-top: 20px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        #yesBtn, #noBtn {
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 18px;
+            cursor: pointer;
+            transform-origin: center;
+        }
+
+        #yesBtn {
+            background: #ff4081;
+            color: white;
+        }
+
+        #noBtn {
+            background: #666;
+            color: white;
+        }
+
+        .big {
+            transform: scale(1.2);
+            box-shadow: 0 5px 15px rgba(255, 64, 129, 0.4);
+        }
+
+        .small {
+            transform: scale(0.8);
+            opacity: 0.8;
+        }
+
+        
     </style>
 </head>
 <body>
@@ -268,7 +320,7 @@
             <div class="story-item">
                 <div class="date">2025.02.14</div>
                 <p>👩‍❤️‍💋‍👨 情人节的咖啡</p>
-                <p>👩‍❤️‍💋‍👨 不是因为巧克力甜，而是因为你的心意所以甜甜，你说不是我点的不甜，你说有故事要等到见面分享(☆▽☆)</p>            
+                <p>👩‍❤️‍💋‍👨 不是因为巧克力甜，而是因为你的心意所以甜甜，你说我点的才会甜，你说有故事要等到见面分享(☆▽☆)</p>            
             </div>
             
             <div class="story-item">
@@ -283,11 +335,22 @@
                 <div id="result"></div>
             </div>
 
+            <div class="proposal">
+                <h3>💌 终极提问 💍</h3>
+                <h4>是否愿意成为我的可爱女孩</h4>
+                <div class="buttons">
+                    <button id="yesBtn" class="big">我愿意！</button>
+                    <button id="noBtn">考虑下...</button>
+                </div>
+            </div>
+
             <div class="footer">
-                <p>细细算，相识不过月半，却觉时光长漫</p>
+                <p><del>细细算，相识不过月半，却觉时光长漫(2.16替换)</del></p>
+                <p>小嘉慧今天也要元气满满哦💪 忙的时候彼此思念就好啦</p>
                 <p>后面也要多多努力，彼此相伴，共同进步成长哦</p>
                 <p style="font-size: 12px; color: #666;"><del>一起多多玩游戏就更好啦</del></p>
             </div>
+            
         </div>
     </div>
 
@@ -377,6 +440,44 @@
                 });
             }
         }
-    </script>
+
+        
+const yesBtn = document.getElementById('yesBtn');
+const noBtn = document.getElementById('noBtn');
+
+// 初始化按钮的缩放比例
+let yesScale = 1;
+let noScale = 1;
+
+noBtn.addEventListener('click', () => {
+    // 每次点击“在考虑下”按钮，缩小为原来的一半
+    noScale *= 0.5;
+    noBtn.style.transform = `scale(${noScale})`;
+
+    // “我愿意”按钮相应变大
+    yesScale *= 1.2;
+    yesBtn.style.transform = `scale(${yesScale})`;
+    yesBtn.style.animation = 'jump 0.5s';
+    setTimeout(() => {
+        yesBtn.style.animation = '';
+    }, 500);
+
+    // 如果“在考虑下”按钮太小，重置尺寸
+    if (noScale < 0.1) {
+        noScale = 1;
+        yesScale = 1;
+        noBtn.style.transform = `scale(${noScale})`;
+        yesBtn.style.transform = `scale(${yesScale})`;
+        alert("别考虑啦，快答应吧！❤️");
+    }
+});
+
+yesBtn.addEventListener('click', () => {
+    yesBtn.textContent = "❤️ 我愿意！ ❤️";
+    createConfetti();
+    alert("太棒啦！我们一起开启幸福旅程吧！💖");
+});
+
+</script>
 </body>
 </html>
