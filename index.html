@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我们的故事</title>
+    <title>我们的情人节小票</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
@@ -19,15 +19,11 @@
             min-height: 100vh;
         }
 
-        /* 音频隐藏
+        /* 音频隐藏 */
         #myAudio {
             display: none;
-        } */
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
         }
+
         .printer-container {
             position: relative;
             width: 100%;
@@ -91,10 +87,6 @@
         /* .receipt:before { top: -5px; }
         .receipt:after { bottom: -5px; } */
 
-        .receipt iframe {
-            margin-top: 10px; /* 调整与标题的距离 */
-            margin-bottom: 2px; /* 调整与下方内容的距离 */
-        }
         /* 打印机文字 */
         .printer-text {
             text-align: center;
@@ -194,14 +186,13 @@
     </style>
 </head>
 <body>
-
-        <!-- <audio id="myAudio" preload="auto">
-        <source src="https://km-sycdn.kmplayer-music-api.sbs/08baaa6f4a963a031f980bd6a247e6b7/resource/3501346832473.ogg" type="audio/mpeg">
-    </audio> -->
+    <audio id="myAudio" preload="auto" loop>
+        <source src="https://m801.music.126.net/20250216085037/b3f9406ca5653b3e1255c971b325ca7d/jdymusic/obj/wo3DlMOGwrbDjj7DisKw/28481676773/b8f3/8071/8bbf/0ef655aa730386cd35d1503c3d1d0ae0.mp3" type="audio/mpeg">
+    </audio>
 
     <div class="printer-container">
-        <!-- 播放/暂停按钮
-        <div id="playButton">⏸️</div> -->
+        <!-- 播放/暂停按钮 -->
+        <div id="playButton">⏸️</div>
 
         <!-- 截图按钮 -->
         <button id="screenshot-btn">截图</button>
@@ -215,7 +206,6 @@
                 <h2> 购物小票 </h2>
                 <p>顾客：我们</p>
                 <p>日期：从相遇那天起</p>
-                <iframe  id="myAudio" frameborder="no" border="0"  marginwidth="0" marginheight="0" width=330 height=86 allow="autoplay" src="http://music.163.com/outchain/player?type=2&id=1303027499&auto=1&height=66"></iframe>
             </div>
 
             <div class="story-item">
@@ -274,13 +264,13 @@
                 <p>🍔 五星评论家爱因斯坦点了个赞</p>
                 <p style="font-size: 12px; color: #666;">*爱因斯坦提出的是E=mc²</p>    
             </div>
-            
+
             <div class="story-item">
                 <div class="date">2025.02.14</div>
-                <p>🍬 甜甜的咖啡</p>
-                <p>🍬 不是因为咖啡甜，是因为你点的咖啡所以甜</p>
+                <p>👩‍❤️‍💋‍👨 情人节的咖啡</p>
+                <p>👩‍❤️‍💋‍👨 不是因为巧克力甜，而是因为你的心意所以甜甜</p>            
             </div>
-
+            
             <div class="story-item">
                 <div class="date">2025.03.11</div>
                 <p>💖 即将到来的生日</p>
@@ -288,7 +278,7 @@
             </div>
 
             <div class="lottery" id="lottery-section">
-                <h3> 🌈 情人节抽奖 💎</h3>
+                <h3> 🌈 惊喜抽奖 💎</h3>
                 <button id="lottery-btn">点我抽惊喜 🎁</button>
                 <div id="result"></div>
             </div>
@@ -302,36 +292,37 @@
     </div>
 
     <script>
-        // // 获取音频和播放按钮
-        // const audio = document.getElementById('myAudio');
-        // const playButton = document.getElementById('playButton');
+        // 获取音频和播放按钮
+        const audio = document.getElementById('myAudio');
+        const playButton = document.getElementById('playButton');
+        
+        let userInteracted = false;
 
-        // let userInteracted = false;
 
+        // 监听用户交互事件，设置 userInteracted 为 true
+        ['click', 'touchstart', 'keydown'].forEach(eventType => {
+            window.addEventListener(eventType, () => {
+                if (!userInteracted) {
+                    userInteracted = true;
+                    audio.load()
+                    // 尝试自动播放音频
+                    audio.play().catch(error => {
+                        console.error("自动播放失败:", error);
+                    });
+                }
+            }, { once: true });
+        });
 
-        // // 监听用户交互事件，设置 userInteracted 为 true
-        // ['click', 'touchstart', 'keydown'].forEach(eventType => {
-        //     window.addEventListener(eventType, () => {
-        //         if (!userInteracted) {
-        //             userInteracted = true;
-        //             // 尝试自动播放音频
-        //             audio.play().catch(error => {
-        //                 console.error("自动播放失败:", error);
-        //             });
-        //         }
-        //     }, { once: true });
-        // });
-
-        // // 播放/暂停逻辑
-        // playButton.addEventListener('click', () => {
-        //     if (audio.paused) {
-        //         audio.play();
-        //         playButton.textContent = '⏸️'; // 暂停图标
-        //     } else {
-        //         audio.pause();
-        //         playButton.textContent = '▶️'; // 播放图标
-        //     }
-        // });
+        // 播放/暂停逻辑
+        playButton.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+                playButton.textContent = '⏸️'; // 暂停图标
+            } else {
+                audio.pause();
+                playButton.textContent = '▶️'; // 播放图标
+            }
+        });
 
         // 截图功能
         document.getElementById('screenshot-btn').addEventListener('click', () => {
@@ -345,12 +336,7 @@
 
         // 抽奖逻辑
         const prizes = [
-            "给我点一杯奶茶😋",
-            "给我点一杯咖啡😋",
-            "给我点一杯牛奶😋",
-            "给我点一杯果茶😋",
-            "给我点两杯奶茶😋",
-            "给我点两杯牛奶😋"
+            "快乐的约会",
         ];
 
         const lotteryBtn = document.getElementById('lottery-btn');
@@ -358,7 +344,7 @@
 
         lotteryBtn.addEventListener('click', () => {
             // 禁用按钮防止重复点击
-            // lotteryBtn.disabled = true;
+            lotteryBtn.disabled = true;
             lotteryBtn.classList.add('spinning');
 
             // 模拟抽奖过程
