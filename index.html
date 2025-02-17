@@ -339,7 +339,7 @@
                 <h3>💌 终极提问 💍</h3>
                 <h4>愿意一直做我的可爱女孩吗</h4>
                 <div class="buttons">
-                    <button id="yesBtn" class="big">我愿意！</button>
+                    <button id="yesBtn">我愿意！</button>
                     <button id="noBtn">考虑下...</button>
                 </div>
             </div>
@@ -444,13 +444,13 @@
         
 const yesBtn = document.getElementById('yesBtn');
 const noBtn = document.getElementById('noBtn');
-
+const h4Element = document.getElementsByTagName("h4")[0];
 // 初始化按钮的缩放比例
 let yesScale = 1;
 let noScale = 1;
 
 noBtn.addEventListener('click', () => {
-    // 每次点击“在考虑下”按钮，缩小为原来的一半
+    // 每次点击“考虑下”按钮，缩小为原来的一半
     noScale *= 0.5;
     noBtn.style.transform = `scale(${noScale})`;
 
@@ -462,20 +462,22 @@ noBtn.addEventListener('click', () => {
         yesBtn.style.animation = '';
     }, 500);
 
-    // 如果“在考虑下”按钮太小，重置尺寸
-    if (noScale < 0.1) {
-        noScale = 1;
-        yesScale = 1;
-        noBtn.style.transform = `scale(${noScale})`;
-        yesBtn.style.transform = `scale(${yesScale})`;
-        alert("别考虑啦，快答应吧！❤️");
-    }
+    // // 如果“考虑下”按钮太小，重置尺寸
+    // if (noScale < 0.1) {
+    //     noScale = 1;
+    //     yesScale = 1;
+    //     noBtn.style.transform = `scale(${noScale})`;
+    //     yesBtn.style.transform = `scale(${yesScale})`;
+    //     alert("别考虑啦，快答应吧！❤️");
+    // }
 });
 
 yesBtn.addEventListener('click', () => {
     yesBtn.textContent = "❤️ 我愿意！ ❤️";
+    yesBtn.style.transform = `scale(1)`;
+    noBtn.style.display = `none`;
     createConfetti();
-    alert("太棒啦！我们一起开启幸福旅程吧！💖");
+    h4Element.innerText = "太棒啦！我们一起继续幸福旅程吧！💖";
 });
 
 </script>
