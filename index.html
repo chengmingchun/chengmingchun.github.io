@@ -118,6 +118,66 @@
         opacity: 1; /* 悬停时，光晕更明显 */
     }
 
+    /* --- 拍立得照片样式 --- */
+.title-with-polaroids {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px; /* 与副标题拉开距离 */
+}
+
+.polaroid-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* 两张照片间的距离 */
+    margin-top: 20px; /* 与主标题的距离 */
+    perspective: 800px; /* 为3D效果创建视差 */
+}
+
+.polaroid-item {
+    width: 100px; /* 照片宽度 */
+    padding: 8px 8px 18px 8px; /* 拍立得相纸的白边 */
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.2);
+    border: 1px solid #eee;
+    text-align: center;
+    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.polaroid-item:hover {
+    transform: scale(1.1) translateY(-10px) rotateZ(0deg) !important; /* 悬停时放大并居中 */
+    z-index: 10;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+}
+
+
+.polaroid-item img {
+    width: 100%;
+    display: block;
+}
+
+.polaroid-item span {
+    font-size: 12px;
+    color: var(--secondary-color);
+    margin-top: 8px;
+    display: block;
+    font-family: 'La Belle Aurore', cursive; /* 使用手写体，增加亲切感 */
+}
+
+/* 赋予照片不同的初始角度，像随意散落在桌上 */
+.polaroid-he {
+    transform: rotateZ(-8deg);
+}
+.polaroid-she {
+    transform: rotateZ(6deg);
+}
+
+.subtitle {
+    text-align: center;
+    margin-top: 10px;
+    color: var(--secondary-color);
+    font-style: italic;
+}
+
     @keyframes breath {
         from {
             transform: scale(1);
@@ -170,10 +230,19 @@
                 <div class="receipt">
                     <div class="receipt-content">
                         <div class="header">
-                            <h2>我们的故事</h2>
-                            <p>FOR: 唯一的你</p>
+                            <div class="title-with-polaroids">
+                                <h2>我们的故事</h2>
+                                <div class="polaroid-container">
+                                    <div class="polaroid-item polaroid-he">
+                                        <img src="m.jpg">
+                                    </div>
+                                    <div class="polaroid-item polaroid-she">
+                                        <img src="u.jpg">
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="subtitle">FOR: 唯一的你</p>
                         </div>
-
                         <div class="story-item" style="--i: 18; border-top: 2px solid #333; padding-top: 20px; margin-top: 30px; text-align: center;">
                             <p style="font-weight:700; font-size: 18px; letter-spacing: 2px; color: #333;">--- 第一幕 ---<br>春日</p>
                         </div>
@@ -253,14 +322,14 @@
         { date: "末 • 五月十八日", title: "仓促的休止符", content: "故事不会结束，只是在等待下一篇乐章", icon: "fas fa-pause-circle" },
     ];
     const storyDataActTwo = [
-        { date: "约定 • 七月二十七", title: "江湖有缘~", content: "妈呀，你会写小作文了，但是江湖太过吵闹。我想要的，是一份，可以安放彼此的安宁。", icon: "fas fa-file-signature"},
-        { date: "狗狗 • 八月五日", title: "养不养小狗", content: "西高地真的好贵，白柴犬好活泼，比熊真是可爱，雪纳瑞也好，当我们决定有一个家时，会有位置养你最喜欢的那只", icon: "fas fa-paw" },
+        { date: "约定 • 七月二十七", title: "江湖有缘~", content: "妈呀，你会写小作文了，但是江湖太过吵闹。更想要可以安放彼此安宁的我们的小世界", icon: "fas fa-file-signature"},
+        { date: "狗狗 • 八月五日", title: "养不养小狗", content: "西高地真的好贵，白柴犬好活泼，比熊真是可爱，雪纳瑞也好，我们的家里会有位置留给你最喜欢的那只", icon: "fas fa-paw" },
         { date: "稻城 • 八月六日", title: "偷牛贼与高铁侠", content: "我们应该是世界上最可爱的笨贼，不知道你偷的牦牛好不好带走，反正我偷的高铁很难带呢", icon: "fas fa-mountain-sun" },
         { date: "长安 • 八月十八", title: "滴滴，牛马已在位", content: "约定终于迎来了即将奔赴的欢悦，所有的等待与不安迎来了风尘仆仆的奔赴", icon: "fas fa-chess-queen" },
         { date: "晚会 • 八月二十", title: "最佳女主角", content: "其实很想告诉你，我的剧本里你就是最佳女主角", icon: "fas fa-film" },
         { date: "聚会 • 八月二十三", title: "闺蜜聚会", content: "最珍贵的环节是送你回家，你问我是不是不想送你，怎么会呢？凌晨晚风温柔，心爱的人坐在身侧，我会贪心的希望这条路没有尽头才最好", icon: "fas fa-key" },
-        { date: "宵夜 • 八月二十五", title: "我愿意，我犹豫", content: "鼓起勇气，却是流泪的你。小狗敛财弟看到依然模糊的距离，也看到拥抱时的那份安宁", icon: "fas fa-anchor" },
-        { date: "反思 • 至今", title: "不对等的重量", content: "我意识到，我给了你太多让你感到压力的东西，却忘了问你是否承受得起。我必须承认我不喜欢那些不确定，我想要那句我愿意", icon: "fas fa-balance-scale-left"}
+        { date: "宵夜 • 八月二十五", title: "我愿意", content: "鼓起勇气，是流泪的你。过载的情绪里，小狗敛财弟看到拥抱时的那份安宁", icon: "fas fa-anchor" },
+        { date: "万象 • 八月二十七", title: "潦草小狗", content: "谁会抛弃作业笔记傻乎乎的来看潦草小狗展？我觉得是我最喜欢的那个女孩子：>", icon: "fas fa-balance-scale-left"}
     ];
 
     function renderStories(data, containerId, startIndex) {
