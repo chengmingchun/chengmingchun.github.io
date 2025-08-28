@@ -118,52 +118,114 @@
         opacity: 1; /* 悬停时，光晕更明显 */
     }
 
-    /* --- 拍立得照片样式 --- */
+/* --- 拍立得照片样式 (V5.0 - 触控兼容版) --- */
 .title-with-polaroids {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 15px; /* 与副标题拉开距离 */
+    margin-bottom: 15px;
 }
 
 .polaroid-container {
     display: flex;
     justify-content: center;
-    gap: 10px; /* 两张照片间的距离 */
-    margin-top: 20px; /* 与主标题的距离 */
-    perspective: 800px; /* 为3D效果创建视差 */
+    align-items: center;
+    gap: 15px;
+    margin-top: 25px;
+    padding-bottom: 20px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent; /* 移除移动端点击时的灰色背景 */
 }
 
 .polaroid-item {
-    width: 100px; /* 照片宽度 */
-    padding: 8px 8px 18px 8px; /* 拍立得相纸的白边 */
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.2);
-    border: 1px solid #eee;
-    text-align: center;
-    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-.polaroid-item:hover {
-    transform: scale(1.1) translateY(-10px) rotateZ(0deg) !important; /* 悬停时放大并居中 */
-    z-index: 10;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    width: 130px;
+    height: 160px;
+    background-color: transparent;
+    perspective: 1200px;
+    transition: transform 0.5s ease, opacity 0.5s ease;
 }
 
-
-.polaroid-item img {
+.polaroid-inner {
+    position: relative;
     width: 100%;
+    height: 100%;
+    transition: transform 0.9s cubic-bezier(0.645, 0.045, 0.355, 1);
+    transform-style: preserve-3d;
+}
+
+/* --- 拍立得照片样式 (V6.0 - 个体心动版) --- */
+.title-with-polaroids {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.polaroid-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 25px;
+    padding-bottom: 20px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.polaroid-item {
+    width: 130px;
+    height: 160px;
+    background-color: transparent;
+    perspective: 1200px;
+    cursor: pointer;
+    transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.5s ease;
+}
+
+.polaroid-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.9s cubic-bezier(0.645, 0.045, 0.355, 1);
+    transform-style: preserve-3d;
+}
+
+/* 
+ * 【魔法的核心】
+ * 当 .polaroid-item 这个“个体”，拥有 .is-flipped 标记时，
+ * 它内部的 .polaroid-inner 元素，才会翻转。
+ */
+.polaroid-item.is-flipped .polaroid-inner {
+    transform: rotateY(180deg);
+}
+
+
+.polaroid-front, .polaroid-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.polaroid-back {
+    transform: rotateY(180deg);
+}
+
+.polaroid-front img, .polaroid-back img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
     display: block;
 }
 
-.polaroid-item span {
-    font-size: 12px;
-    color: var(--secondary-color);
-    margin-top: 8px;
-    display: block;
-    font-family: 'La Belle Aurore', cursive; /* 使用手写体，增加亲切感 */
-}
-
-/* 赋予照片不同的初始角度，像随意散落在桌上 */
+/* 初始散落效果 */
 .polaroid-he {
     transform: rotateZ(-8deg);
 }
@@ -171,13 +233,15 @@
     transform: rotateZ(6deg);
 }
 
+
+
 .subtitle {
     text-align: center;
-    margin-top: 10px;
+    margin-top: 15px;
     color: var(--secondary-color);
     font-style: italic;
+    font-size: 14px;
 }
-
     @keyframes breath {
         from {
             transform: scale(1);
@@ -233,15 +297,33 @@
                             <div class="title-with-polaroids">
                                 <h2>我们的故事</h2>
                                 <div class="polaroid-container">
-                                    <div class="polaroid-item polaroid-he">
-                                        <img src="m.jpg">
+                                    <!-- 他的照片 -->
+                                    <div class="polaroid-item polaroid-he"  id="polaroid-he">
+                                        <div class="polaroid-inner">
+                                            <div class="polaroid-front">
+                                                <img src="m.jpg">
+                                            </div>
+                                            <div class="polaroid-back">
+                                                <img src="m1.png">
+                                            </div>
+                                        </div>
+                                    
                                     </div>
-                                    <div class="polaroid-item polaroid-she">
-                                        <img src="u.jpg">
+                                    <!-- 她的照片 -->
+                                    <div class="polaroid-item polaroid-she" id="polaroid-she">
+                                        <div class="polaroid-inner">
+                                            <div class="polaroid-front">
+                                                <img src="u.jpg">
+                                            </div>
+                                            <div class="polaroid-back">
+                                                <img src="u1.png">
+                                            </div>
+                                        </div>
+                                    
                                     </div>
                                 </div>
                             </div>
-                            <p class="subtitle">FOR: 唯一的你</p>
+                            <p class="subtitle">FOR: 独一无二的我们</p>
                         </div>
                         <div class="story-item" style="--i: 18; border-top: 2px solid #333; padding-top: 20px; margin-top: 30px; text-align: center;">
                             <p style="font-weight:700; font-size: 18px; letter-spacing: 2px; color: #333;">--- 第一幕 ---<br>春日</p>
@@ -270,8 +352,9 @@
                             <h3>💌 THE VOE 💍</h3>
                             <h4 id="proposal-text">
                                 我们的故事，不该再有犹豫和不安<br>
-                                所以我给第三幕的主题是执手相伴<br>
-                                你愿意一起写下去吗？
+                                第三幕的扉页，已经翻开，我给它的主题是
+        <p style="font-weight: bold; text-align: center; font-size: 18px; color: var(--primary-color);">执手相伴</p>
+                                现在这支笔递给你
                             </h4>
                             <div class="buttons">
                                 <button id="yesBtn">我愿意</button>
@@ -314,7 +397,7 @@
         { date: "灵感 • 二月二日", title: " i i = E", content: "五星评论家爱因斯坦点了个赞", icon: "fas fa-brain" },
         { date: "情人节 • 二月十四日", title: "专属甜度", content: "不是因为巧克力甜，而是因为你的心意所以甜甜，你说我点的才会甜，你说有故事要等到见面分享。我的世界竟也多加糖的甜", icon: "fas fa-heart" },
         { date: "鸡汤 • 二月十八日", title: "小飞狗的愿望", content: "小飞狗的终极愿望是和你在一起，把所有平淡的日子，熬成最暖的鸡汤", icon: "fas fa-bone" },
-        { date: "月事 • 三月一日", title: "疼痛的姨妈", content: "以后每个月末，都有一份专属的温暖补给（现在好像没不知道什么时间了耶", icon: "fas fa-band-aid" },
+        { date: "月事 • 三月一日", title: "疼痛的姨妈", content: "以后每个月末，都有一份专属的温暖补给（现在应该月初了", icon: "fas fa-band-aid" },
         { date: "生日 • 三月十一日", title: "刘医生新的一岁", content: "愿这份为你而来的礼物，能缓解你所有的焦虑，带来时刻的欢欣", icon: "fas fa-gift" },
         { date: "屏幕 • 四月四日", title: "第一次视频", content: "有点紧张，有点欢喜，有点期待", icon: "fas fa-video" },
         { date: "山海 • 四月七日", title: "神秘的良药", content: "是礼物，是面皮，更是医治想念的唯一处方", icon: "fas fa-box-open" },
@@ -323,13 +406,13 @@
     ];
     const storyDataActTwo = [
         { date: "约定 • 七月二十七", title: "江湖有缘~", content: "妈呀，你会写小作文了，但是江湖太过吵闹。想要的是，彼此安宁的我们的小世界", icon: "fas fa-file-signature"},
-        { date: "狗狗 • 八月五日", title: "养不养小狗", content: "西高地真的好贵，白柴犬好活泼，比熊真是可爱，雪纳瑞也好...我们的家里，会有位置留给你最喜欢的那只", icon: "fas fa-paw" },
+        { date: "狗狗 • 八月五日", title: "养不养小狗", content: "西高地真的好贵，白柴犬好活泼，比熊真是可爱，雪纳瑞也好...我们的家里一定会有位置，留给你最喜欢的那只", icon: "fas fa-paw" },
         { date: "稻城 • 八月六日", title: "偷牛贼与高铁侠", content: "我们应该是世界上最可爱的笨贼，不知道你偷的牦牛好不好带走，反正我偷的高铁很难带呢", icon: "fas fa-mountain-sun" },
         { date: "长安 • 八月十八", title: "滴滴，牛马已在位", content: "约定终于迎来了即将奔赴的欢悦，所有的等待与不安迎来了风尘仆仆的奔赴", icon: "fas fa-chess-queen" },
         { date: "晚会 • 八月二十", title: "最佳女主角", content: "其实很想告诉你，我的剧本里你就是最佳女主角", icon: "fas fa-film" },
         { date: "聚会 • 八月二十三", title: "闺蜜聚会", content: "最珍贵的环节是送你回家，你问我是不是不想送你，怎么会呢？凌晨晚风温柔，心爱的人坐在身侧，我会贪心的希望这条路没有尽头才最好", icon: "fas fa-key" },
         { date: "宵夜 • 八月二十五", title: "我愿意", content: "鼓起勇气，是流泪的你。过载情绪里，小狗敛财弟看到拥抱时的那份安宁", icon: "fas fa-anchor" },
-        { date: "万象 • 八月二十七", title: "潦草小狗", content: "谁会抛弃作业笔记傻乎乎的来看潦草小狗展？我想是我最喜欢的那个独一无二的女孩子", icon: "fas fa-balance-scale-left"}
+        { date: "万象 • 八月二十七", title: "潦草小狗", content: "谜题：谁会来看没有小狗的潦草小狗？谜底：那个我最喜欢的唯一的你", icon: "fas fa-puzzle-piece"}
     ];
 
     function renderStories(data, containerId, startIndex) {
@@ -458,7 +541,33 @@
         document.querySelector('.meteors').appendChild(meteor);
         setTimeout(() => meteor.remove(), 15000);
     }
-    
+// --- 拍立得照片翻转魔法 (V2.0 - 个体心动版) ---
+const polaroidHe = document.getElementById('polaroid-he');
+const polaroidShe = document.getElementById('polaroid-she');
+const polaroids = [polaroidHe, polaroidShe];
+
+polaroids.forEach(polaroid => {
+    if (polaroid) {
+        polaroid.addEventListener('click', function(event) {
+            // 阻止事件冒泡
+            event.stopPropagation();
+            
+            // 只翻转被点击的这一张
+            this.classList.toggle('is-flipped');
+            
+        });
+    }
+});
+
+// 当点击页面空白处时，让所有照片都翻转回去
+document.addEventListener('click', function() {
+    polaroids.forEach(polaroid => {
+        if (polaroid) {
+            polaroid.classList.remove('is-flipped');
+        }
+    });
+});
+
     </script>
 </body>
 </html>
