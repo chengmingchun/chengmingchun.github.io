@@ -351,14 +351,14 @@
                         <div class="proposal">
                             <h3>💌 THE VOE 💍</h3>
                             <h4 id="proposal-text">
-                                我们的故事，不该再有犹豫和不安<br>
-                                第三幕的扉页，已经翻开，我给它的主题是
+                                我们的故事，已经告别了犹豫和不安<br>
+                                第三幕扉页翻开，它的主题是且只会是
         <p style="font-weight: bold; text-align: center; font-size: 18px; color: var(--primary-color);">执手相伴</p>
-                                现在这支笔递给你
+                                现在只剩下一个问题：
                             </h4>
                             <div class="buttons">
-                                <button id="yesBtn">我愿意</button>
-                                <button id="noBtn">再想想...</button>
+                                <button id="yesBtn">我准备好了</button>
+                                <button id="noBtn"，style="display: none;">我还需要时间</button>
                             </div>
                         </div>
 
@@ -412,7 +412,7 @@
         { date: "晚会 • 八月二十", title: "最佳女主角", content: "其实很想告诉你，我的剧本里你就是最佳女主角", icon: "fas fa-film" },
         { date: "聚会 • 八月二十三", title: "闺蜜聚会", content: "你问我是不是不想送你，怎么会呢？凌晨晚风温柔，心爱的人坐在身侧，我会贪心的希望这条路没有尽头才最好", icon: "fas fa-key" },
         { date: "宵夜 • 八月二十五", title: "我愿意", content: "鼓起勇气，是流泪的你。过载情绪里，小狗敛财弟看到拥抱时的那份安宁", icon: "fas fa-anchor" },
-        { date: "万象 • 八月二十七", title: "潦草小狗", content: "谜题：谁会说走就走看没有小狗的潦草小狗？谜底：我最喜欢的那个你", icon: "fas fa-puzzle-piece"}
+        { date: "日常 • 八月二十七", title: "潦草小狗", content: "谜题：谁会想去看没有小狗的潦草小狗？答案是你，那个我想共度日常的唯一的你", icon: "fas fa-puzzle-piece"}
     ];
 
     function renderStories(data, containerId, startIndex) {
@@ -491,7 +491,7 @@
     const noBtn = document.getElementById('noBtn');
     const proposalText = document.getElementById('proposal-text');
     let yesScale = 1;
-    const noPhrases = ["再想想...", "我害怕...", "可是...", "万一...", "我不敢...", "不行...", "嗯..."];
+    const noPhrases = ["再想想...", "我害怕...", "可是...", "万一...", "我不敢...", "嗯..."];
 
     noBtn.addEventListener('click', (e) => {
         e.preventDefault(); 
