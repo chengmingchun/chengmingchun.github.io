@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS 武器库：打造 Apple 级丝滑的前端体验 — Dev Blog</title>
+  <meta name="description" content="解密如丝般顺滑的前端体验背后的秘密：Parallax 视差、Sticky 占位、Intersection Observer 与 Glassmorphism 全解析。" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="post-body">
+  <div id="reading-progress"></div>
+  <nav class="post-nav glass">
+    <a href="/" class="back-btn"><span>←</span> 返回首页</a>
+    <div class="post-nav-meta">
+      <span class="category-badge" style="background: var(--cat-color)">前端</span>
+      <span class="read-time">☕ 4 分钟阅读</span>
+    </div>
+  </nav>
+  <div class="post-layout">
+    <aside class="toc-sidebar" id="toc"><div class="toc-inner glass"><div class="toc-title">目录</div><nav id="toc-nav"></nav></div></aside>
+    <article class="post-article">
+      <header class="post-header">
+        <div class="post-tags"><span class="tag">#CSS</span><span class="tag">#动画</span><span class="tag">#前端工程</span><span class="tag">#UI设计</span></div>
+        <h1 class="post-title">CSS 武器库：打造 Apple 级丝滑的前端体验</h1>
+        <p class="post-desc">解密如丝般顺滑的前端体验背后的秘密：Parallax 视差、Sticky 占位、Intersection Observer 与 Glassmorphism 全解析。</p>
+        <div class="post-info"><time>2026-04-03</time><span>·</span><span>1075 字</span><span>·</span><span>4 分钟阅读</span></div>
+      </header>
+      <div class="post-content markdown-body" id="post-content"><h1>CSS 武器库：打造 Apple 级丝滑的前端体验</h1>
+<p>在这个由「视觉」和「交互」主导的前端时代，用户的耐心往往被几百毫秒的卡顿或僵硬的刷新动画消耗殆尽。如何让一个网站像 <strong>Apple 官网</strong> 一样，下滑时内容丝滑地浮现、主体顺畅地占据视野？</p>
+<p>今天，这篇博客就来全面复盘我在打造这个博客视觉体验时用到的 <strong>CSS 武器库</strong>，这不仅是一套代码，更是一套直通人类心理感受的交互哲学。即使你是前端小白，这套配置也能让你做到「一秒变高级」。</p>
+<hr />
+<h2>武器一：Parallax 叠层视差（<code>position: sticky</code>）</h2>
+<p>如何实现文章列表在滚动时，如同幕布一般优雅地<strong>滑过</strong>顶部描述？这是营造「丝滑占据主体」体验的核心秘诀。</p>
+<p>很多人会认为用到了一大堆 JS 监听事件和 Scroll 处理引擎？大错特错。CSS 原生支持这一特效。</p>
+<pre><code class="language-css">/* 让头部区域在视图中粘住不动 */
+.hero {
+  position: sticky;
+  top: 0;
+  z-index: 1;           /* 保持在较低的层级 */
+  min-height: 85vh;     /* 占满大半屏，给人呼吸感 */
+}
+
+/* 让下方的内容盖过上面的背景 */
+.main {
+  position: relative;
+  z-index: 10;          /* 设置比 hero 高的层级 */
+  background: var(--bg);/* 重要！必须使用实色背景来将其遮挡 */
+  box-shadow: 0 -20px 40px rgba(0,0,0,0.3); /* 上方边缘加上弥散阴影更显高级 */
+}
+</code></pre>
+<p>仅仅这几行代码，就实现了上下两层的堆叠穿越交互。</p>
+<hr />
+<h2>武器二：基于滚动可见性的动画（Intersection Observer）</h2>
+<p>旧时代的做法是在进入页面瞬间触发全部 CSS 动画。不仅消耗性能，还会在加载较慢的情况下出现内容直接跳变。</p>
+<p>优雅的做法是：<strong>当元素即将出现在视野里时，再执行上滑、淡入等动画。</strong> 这也就是大家常说的 PPT 丝滑过场效果。</p>
+<h3>第 1 步：CSS 设置隐藏及变化规则</h3>
+<p>我们先让卡片在默认状态下隐藏（<code>opacity: 0</code>）并向下偏移（<code>translateY(80px)</code>）：</p>
+<pre><code class="language-css">.post-card {
+  opacity: 0;
+  transform: translateY(80px);
+  /* 贝塞尔曲线：让动画具备“阻尼感”，如同真的有重力一样 */
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+              opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 当追加上 show 类时显现 */
+.post-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+</code></pre>
+<h3>第 2 步：JS 神器 Intersection Observer</h3>
+<p>通过原生 API，浏览器在后台极低开销地帮我们监控元素的曝光：</p>
+<pre><code class="language-javascript">const observer = new IntersectionObserver((entries, obs) =&gt; {
+  entries.forEach(entry =&gt; {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('show');
+      obs.unobserve(entry.target); // 动画放过一次就取消监听，防止反复抖动
+    }
+  });
+}, { threshold: 0.05, rootMargin: '40px' });
+
+// 只需要对元素发起观察
+document.querySelectorAll('.post-card').forEach(card =&gt; observer.observe(card));
+</code></pre>
+<hr />
+<h2>武器三：高级磨砂玻璃（Glassmorphism）</h2>
+<p>如果只是纯黑或纯白，网页就会像发给客户的 Word 文档。要想在导航栏和侧边栏做出空间感，不可缺少的是<strong>毛玻璃</strong>特效：</p>
+<pre><code class="language-css">.glass-nav {
+  background: rgba(10, 10, 19, 0.85); /* 背景需要带点透明度 */
+  backdrop-filter: blur(16px);        /* CSS 核心滤镜，将背后的元素模糊化 */
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.08); /* 极细微的一道高光边框 */
+}
+</code></pre>
+<hr />
+<h2>武器四：设计系统的暗黑哲学（CSS Variables）</h2>
+<p>没有统一设定的工程师，必定在写 CSS 颜色时苦苦寻梦。建立你的 <code>var()</code> 变量，一键做到全局切换日间 / 夜间模式：</p>
+<pre><code class="language-css">:root {
+  --bg: #0a0a13;
+  --surface: rgba(255,255,255,0.04);
+  --text: #e8e8f0;
+  --accent: #6366f1; /* 主色调靛蓝 */
+}
+
+/* 结合文字渐变，突破平庸的边界 */
+.grad-text {
+  background: linear-gradient(135deg, var(--accent), #8b5cf6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+</code></pre>
+<h2>总结</h2>
+<p>不需要庞大的框架，甚至不用安装多余的 <code>npm</code> 依赖包，光靠这四个 CSS 核心理念以及几行 Vanilla JS，你就可以把一堆看似简陋的数据，包装成硅谷科技巨头的审美。</p>
+<blockquote>
+<p>下次在你的项目中，“抄”下这套配置，去给别人眼球做一次马杀鸡吧！</p>
+</blockquote>
+</div>
+      <footer class="post-footer"><a href="/" class="btn-primary">← 返回文章列表</a></footer>
+    </article>
+  </div>
+  <script src="/post.js"></script>
+</body>
+</html>

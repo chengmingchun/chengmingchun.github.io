@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>现代 CSS 技巧：Glassmorphism 与 CSS 变量 — Dev Blog</title>
+  <meta name="description" content="探索现代 CSS 的强大特性——CSS 自定义属性、glassmorphism 效果、容器查询，打造令人惊艳的视觉效果。" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body class="post-body">
+  <div id="reading-progress"></div>
+  <nav class="post-nav glass">
+    <a href="/" class="back-btn"><span>←</span> 返回首页</a>
+    <div class="post-nav-meta">
+      <span class="category-badge" style="background: var(--cat-color)">前端</span>
+      <span class="read-time">☕ 2 分钟阅读</span>
+    </div>
+  </nav>
+  <div class="post-layout">
+    <aside class="toc-sidebar" id="toc"><div class="toc-inner glass"><div class="toc-title">目录</div><nav id="toc-nav"></nav></div></aside>
+    <article class="post-article">
+      <header class="post-header">
+        <div class="post-tags"><span class="tag">#CSS</span><span class="tag">#前端</span><span class="tag">#设计</span><span class="tag">#UI</span></div>
+        <h1 class="post-title">现代 CSS 技巧：Glassmorphism 与 CSS 变量</h1>
+        <p class="post-desc">探索现代 CSS 的强大特性——CSS 自定义属性、glassmorphism 效果、容器查询，打造令人惊艳的视觉效果。</p>
+        <div class="post-info"><time>2026-03-25</time><span>·</span><span>497 字</span><span>·</span><span>2 分钟阅读</span></div>
+      </header>
+      <div class="post-content markdown-body" id="post-content"><h1>现代 CSS 技巧：Glassmorphism 与 CSS 变量</h1>
+<p>现代 CSS 已经强大到令人惊讶的程度，无需 JavaScript 就能实现很多复杂的视觉效果。本文总结几个实用的现代 CSS 技巧。</p>
+<h2>CSS 自定义属性（变量）</h2>
+<p>CSS 变量是构建设计系统的基础：</p>
+<pre><code class="language-css">:root {
+  --color-primary: #6366f1;
+  --color-bg: #0f0f1a;
+  --color-surface: rgba(255, 255, 255, 0.05);
+  --border-radius: 16px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 亮色主题覆盖 */
+[data-theme="light"] {
+  --color-bg: #f8fafc;
+  --color-surface: rgba(0, 0, 0, 0.04);
+}
+</code></pre>
+<p>主题切换只需在 <code>html</code> 元素上切换 <code>data-theme</code> 属性，所有颜色自动更新！</p>
+<h2>Glassmorphism 效果</h2>
+<p>毛玻璃效果的核心是 <code>backdrop-filter</code>：</p>
+<pre><code class="language-css">.glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+</code></pre>
+<p>关键参数：</p>
+<ul>
+<li><code>blur()</code> 值越大，背景越模糊（通常 12px~24px）</li>
+<li><code>background</code> 透明度控制玻璃的“厚度“</li>
+<li><code>border</code> 用半透明白色模拟玻璃边缘折射</li>
+</ul>
+<h2>流畅动画</h2>
+<pre><code class="language-css">.card {
+  transform: translateY(0);
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+}
+</code></pre>
+<p>用 <code>cubic-bezier</code> 替代线性动画，感觉更自然。</p>
+<h2>容器查询（Container Queries）</h2>
+<p>比媒体查询更精准：</p>
+<pre><code class="language-css">.card-container {
+  container-type: inline-size;
+}
+
+@container (min-width: 400px) {
+  .card {
+    flex-direction: row;
+  }
+}
+</code></pre>
+<h2>CSS Grid 高级布局</h2>
+<pre><code class="language-css">.posts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+</code></pre>
+<p><code>auto-fill</code> + <code>minmax</code> 实现自适应列数，无需媒体查询！</p>
+<h2>渐变文字</h2>
+<pre><code class="language-css">.gradient-text {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+</code></pre>
+<h2>总结</h2>
+<p>现代 CSS 的能力远超 10 年前的想象：</p>
+<ul>
+<li><strong>CSS 变量</strong>：设计系统和主题切换的基础</li>
+<li><strong>backdrop-filter</strong>：毛玻璃效果</li>
+<li><strong>容器查询</strong>：组件级响应式</li>
+<li><strong>CSS Grid</strong>：强大的二维布局</li>
+</ul>
+<p>拥抱这些特性，你会发现大量 JavaScript 操控样式的代码可以用纯 CSS 替代。</p>
+</div>
+      <footer class="post-footer"><a href="/" class="btn-primary">← 返回文章列表</a></footer>
+    </article>
+  </div>
+  <script src="/post.js"></script>
+</body>
+</html>
