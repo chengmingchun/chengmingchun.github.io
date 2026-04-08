@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spring's Blog</title>
+  <meta name="description" content="记录 Rust、算法、技术工程的思考与实践" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+
+<body>
+
+  <!-- ═══ Hero ═══ -->
+  <section class="hero">
+    <div class="hero-tag">Spring's Blog</div>
+    <h1>
+      <span class="grad" id="typing-text"></span>
+    </h1>
+    <p class="hero-sub">
+      记录 Rust · 算法 · 技术 · 系统设计的思考与实践。<br />
+      每篇文章都是一次认知迭代。
+    </p>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num" id="stat-posts">—</div>
+        <div class="stat-label">篇文章</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-categories">—</div>
+        <div class="stat-label">个分类</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-hours">—</div>
+        <div class="stat-label">小时阅读量</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ Toolbar ═══ -->
+  <div class="toolbar" id="toolbar">
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.35-4.35" />
+      </svg>
+      <input id="searchInput" type="search" placeholder="搜索文章标题、标签…" autocomplete="off" />
+    </div>
+    <div class="categories" id="catChips"></div>
+    <button class="theme-btn" id="themeBtn" title="切换主题">🌙</button>
+  </div>
+
+  <!-- ═══ Main ═══ -->
+  <main class="main" id="mainSection">
+    <div class="main-inner">
+      <div class="section-head">
+        <h2 class="section-title">全部文章</h2>
+        <span class="result-count" id="resultCount"></span>
+      </div>
+      <div class="posts-grid" id="postsGrid">
+        <!-- Cards injected by app.js -->
+        <div class="empty-state" id="loadingState">
+          <h3>加载中…</h3>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+
+</html>
