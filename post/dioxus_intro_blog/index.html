@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dioxus 入门实战指南 — Dev Blog</title>
+  <meta name="description" content="Rust小白也能写出炫酷桌面端？Dioxus 入门实战指南（以“财富物语”项目为例）" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css?v=3" />
+</head>
+<body class="post-body">
+  <div id="reading-progress"></div>
+  <nav class="post-nav glass">
+    <a href="/" class="back-btn"><span>←</span> 返回首页</a>
+    <div class="post-nav-meta">
+      <span class="category-badge" style="background: var(--cat-color)">Rust</span>
+      <span class="read-time">☕ 6 分钟阅读</span>
+    </div>
+  </nav>
+  <div class="post-layout">
+    <aside class="tree-sidebar" id="post-tree"><div class="toc-inner glass"><div class="toc-title">分类导航</div><nav id="tree-nav"></nav></div></aside>
+    <article class="post-article">
+      <header class="post-header">
+        <div class="post-tags"><span class="tag">#Rust</span><span class="tag">#Dioxus </span><span class="tag">#UI设计</span></div>
+        <h1 class="post-title">Dioxus 入门实战指南</h1>
+        <p class="post-desc">Rust小白也能写出炫酷桌面端？Dioxus 入门实战指南（以“财富物语”项目为例）</p>
+        <div class="post-info"><time>2026-04-04</time><span>·</span><span>1771 字</span><span>·</span><span>6 分钟阅读</span></div>
+      </header>
+      <div class="post-content markdown-body" id="post-content"><h1>🌟 Rust小白也能写出炫酷桌面端？Dioxus 入门实战指南</h1>
+<p>听到 Rust，很多人第一反应可能是“学习曲线陡峭”、“底层系统开发”。但如果我告诉你，只要懂一点点前端知识（React / HTML），你就能用 Rust 写出极具苹果风、动画流畅的桌面端软件呢？</p>
+<p>今天我们就来揭秘神器 —— <strong><a href="https://dioxuslabs.com/">Dioxus</a></strong>，并结合当前最新的实战项目 <strong>“财富物语超级管控中心”</strong>，为你献上一份小白也能看懂的 Dioxus 桌面端入门攻略！</p>
+<hr />
+<h2>🧐 第一步：Dioxus 是个啥？好用吗？</h2>
+<p>Dioxus 是一个 Rust 的跨平台 GUI 框架。它的核心设计理念极大程度地借鉴了 React：</p>
+<ul>
+<li><strong>声明式 UI</strong>：只要你会写 HTML 标签，就能看得懂它的 <code>rsx!</code> 宏。</li>
+<li><strong>状态驱动</strong>：改变了一处状态（Signal），界面就会自动重新渲染。</li>
+<li><strong>跨平台</strong>：一套代码可以编译成 Web 页面，也可以打包成桌面端应用（Desktop）、甚至移动端（Mobile）。</li>
+</ul>
+<p>在我们的实战项目“财富物语”中，我们使用的是 Dioxus 的 <strong>桌面端（Desktop）</strong> 模式。</p>
+<hr />
+<h2>🛠 第二步：起步！项目依赖配置</h2>
+<p>首先，我们需要在 <code>Cargo.toml</code> 中引入 Dioxus 和其他关键库：</p>
+<pre><code class="language-toml">[dependencies]
+# 引入 Dioxus 核心及桌面端 Feature (当前项目使用 0.6 版本)
+dioxus = { version = "0.6", features = ["desktop"] }
+# 搭配 Tokio 处理异步任务（对，Rust 的异步也是必备的！）
+tokio = { version = "1.43", features = ["full"] }
+# 数据库：用于本地存储记账数据
+sqlx = { version = "0.8", features = ["sqlite", "runtime-tokio"] }
+</code></pre>
+<blockquote>
+<p><strong>💡 小贴士：</strong> Dioxus 自带热更新机制（hot-reload），开发体验拉满，改完 UI 代码保存即可秒看效果，简直是效率神器！</p>
+</blockquote>
+<hr />
+<h2>🚀 第三步：程序入口，点火发射！</h2>
+<p>在桌面端应用中，我们需要对窗口进行一些配置，比如窗口大小、标题，甚至注入 CSS。在我们的项目 <code>src/main.rs</code> 中，入口代码长这样：</p>
+<pre><code class="language-rust">fn main() {
+    // 1. 初始化数据库连接池 (结合 Tokio 异步执行)
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let pool = rt.block_on(async { db::init_pool().await });
+    
+    // 2. 配置桌面窗口
+    let cfg = Config::new()
+        .with_window(
+            WindowBuilder::new()
+                .with_title("财富物语超级管控中心")
+                .with_inner_size(dioxus::desktop::tao::dpi::LogicalSize::new(1024.0, 768.0))
+        )
+        // 🔥 大杀器：直接注入 TailwindCSS 脚本，写样式就像写飞翔一样自由！
+        .with_custom_head(r#"&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;"#.to_string());
+
+    // 3. 启动应用！并通过 with_context 将全局状态（数据库连接）传递下去
+    LaunchBuilder::desktop()
+        .with_cfg(cfg)
+        .with_context(AppState { pool })
+        .launch(App);
+}
+</code></pre>
+<p>这里我们用了个偷懒又好用的招式：直接通过 <code>.with_custom_head</code> 引入 TailwindCSS 的 CDN，这样我们就能在 Rust 里直接写 <code>class: "text-red-500 font-bold"</code> 啦！</p>
+<hr />
+<h2>🎨 第四步：编写你的第一个组件 <code>App</code></h2>
+<p>Dioxus 的视图部分是由 <code>rsx!</code> 宏组成的。如果之前写过 React JSX，下面这段代码你会非常亲切：</p>
+<pre><code class="language-rust">fn App() -&gt; Element {
+    // 定义一个类似 React useState 的状态：记录当前激活的侧边栏导航卡片
+    let mut active_tab = use_signal(|| "dashboard".to_string());
+
+    rsx! {
+        div {
+            class: "min-h-screen flex text-white bg-black",
+            
+            // 简单写一段导航栏
+            nav {
+                class: "w-64 p-4",
+                button {
+                    class: if active_tab() == "dashboard" { "bg-blue-500" } else { "bg-transparent" },
+                    // 点击事件！触发状态更新
+                    onclick: move |_| active_tab.set("dashboard".to_string()),
+                    "大盘管控"
+                }
+            }
+
+            // 根据状态渲染不同页面
+            main {
+                class: "flex-1 p-8",
+                if active_tab() == "dashboard" {
+                    Dashboard {} // 渲染自定义组件
+                } else if active_tab() == "expenses" {
+                    Expenses {} // 渲染记账组件
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<p><strong>重点解析：</strong></p>
+<ol>
+<li><strong><code>use_signal</code></strong>: Dioxus 0.5+ 开始推荐使用的信号机制。用来保存需要跟随 UI 更新的状态。</li>
+<li><strong><code>move |_|</code></strong>: 闭包语法，用于捕获外部变量进行事件处理。</li>
+</ol>
+<hr />
+<h2>🧠 第五步：进阶！异步数据获取与组件拆分</h2>
+<p>除了简单的页面切换，真正实用的 Desktop App 需要展示数据，这就涉及到“异步请求数据”的操作了。Dioxus 提供了 <code>use_resource</code> 来专门处理异步逻辑。</p>
+<p>带大家看看我们的 <code>Dashboard</code> 组件是如何从数据库加载总花费数据的：</p>
+<pre><code class="language-rust">#[component] // ← 声明这是个复用组件的宏
+fn Dashboard() -&gt; Element {
+    // 1. 拿到 main 函数中注入的数据库连接池！跨层级传值神器
+    let state = use_context::&lt;AppState&gt;();
+    
+    // 2. 异步获取数据（资源）
+    let total_expenses = use_resource(move || {
+        let pool = state.pool.clone();
+        async move {
+            // 这里执行异步的 SQL 查询
+            let row: Result&lt;(f64,), sqlx::Error&gt; = sqlx::query_as("SELECT SUM(amount) FROM expenses").fetch_one(&amp;pool).await;
+            row.map(|r| r.0).unwrap_or(0.0)
+        }
+    });
+
+    rsx! {
+        div { class: "p-6",
+            h2 { "全盘概览" }
+            // 3. 处理不同状态的数据加载
+            match total_expenses.read_unchecked().as_ref() {
+                Some(val) =&gt; rsx! { p { "历史总支出：¥{val:.2}" } }, // 成功加载
+                None =&gt; rsx! { p { "加载中..." } } // 加载中动画
+            }
+        }
+    }
+}
+</code></pre>
+<hr />
+<h2>⚡️ 第六步：事件响应与执行异步任务（Spawn）</h2>
+<p>在“记账列表（Expenses）”页面，由于需要用户输入金额并保存，我们需要用到按钮点击事件。而且“保存到数据库”是一个异步的操作，不能阻塞主线程，要怎么处理呢？</p>
+<pre><code class="language-rust">#[component]
+fn Expenses() -&gt; Element {
+    let state = use_context::&lt;AppState&gt;();
+    // 受控表单输入组件绑定状态
+    let mut amount = use_signal(|| "".to_string());
+    
+    let submit_action = move |pool: sqlx::SqlitePool| {
+        let amt_val = amount().parse::&lt;f64&gt;().unwrap_or(0.0);
+        
+        // 🔥 使用 spawn 启动一个后台异步任务！
+        spawn(async move {
+            let _ = sqlx::query("INSERT INTO expenses (amount) VALUES (?)")
+                .bind(amt_val)
+                .execute(&amp;pool).await;
+            
+            // 数据重制
+            amount.set("".to_string());
+        });
+    };
+
+    rsx! {
+        input { 
+            value: "{amount}",
+            // 用户输入时，同步修改状态
+            oninput: move |e| amount.set(e.value().clone())
+        }
+        button { 
+            onclick: move |_| submit_action(state.pool.clone()),
+            "记录一笔！"
+        }
+    }
+}
+</code></pre>
+<p>这就是在 Dioxus 中进行用户交互交互的标准范式：</p>
+<ul>
+<li>为 Input 元素提供 <code>value</code>，并监听 <code>oninput</code> 改变 <code>Signal</code> 的状态。</li>
+<li>在 <code>onclick</code> 等事件闭包中，通过由 Dioxus 提供的 <code>spawn()</code> 开启不阻塞 UI 渲染的异步工作协程。</li>
+</ul>
+<hr />
+<h2>📖 总结：为什么小白也该学点 Dioxus？</h2>
+<p>“财富物语”项目仅用了几百行 Rust 代码，就基于原生 Webview + TailwindCSS 构建出了媲美苹果原生、设计感极强的界面。核心优势就是：</p>
+<ol>
+<li><strong>上手极快</strong>：只要有一定的前端基础，套用 React 思想转 Dioxus 非常丝滑。</li>
+<li><strong>脱离 Electron 魔爪</strong>：它基于操作系统的原生 WebView 引擎（如 macOS 下的 WkWebView，Windows 的 WebView2），内存占用极小。</li>
+<li><strong>Rust 的严谨+高性能背书</strong>：享受模式匹配、没有空指针恐惧的后端/数据库全栈开发一条龙。</li>
+</ol>
+<p>勇敢地尝试一下吧！无论是想用一门语言统一前后端全栈，还是快速开发一个轻量级跨平台小工具，Dioxus 无疑是 Rust 宇宙中最亮眼的那颗星。🌟</p>
+</div>
+      <footer class="post-footer"><a href="/" class="btn-primary">← 返回文章列表</a></footer>
+    </article>
+    <aside class="toc-sidebar" id="toc"><div class="toc-inner glass"><div class="toc-title">目录</div><nav id="toc-nav"></nav></div></aside>
+  </div>
+  <script src="/post.js?v=3"></script>
+</body>
+</html>

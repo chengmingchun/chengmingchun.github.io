@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rust 入门：所有权系统详解 — Dev Blog</title>
+  <meta name="description" content="深入理解 Rust 的核心概念——所有权、借用与生命周期，彻底告别内存安全问题。" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css?v=3" />
+</head>
+<body class="post-body">
+  <div id="reading-progress"></div>
+  <nav class="post-nav glass">
+    <a href="/" class="back-btn"><span>←</span> 返回首页</a>
+    <div class="post-nav-meta">
+      <span class="category-badge" style="background: var(--cat-color)">Rust</span>
+      <span class="read-time">☕ 2 分钟阅读</span>
+    </div>
+  </nav>
+  <div class="post-layout">
+    <aside class="tree-sidebar" id="post-tree"><div class="toc-inner glass"><div class="toc-title">分类导航</div><nav id="tree-nav"></nav></div></aside>
+    <article class="post-article">
+      <header class="post-header">
+        <div class="post-tags"><span class="tag">#Rust</span><span class="tag">#系统编程</span><span class="tag">#内存安全</span></div>
+        <h1 class="post-title">Rust 入门：所有权系统详解</h1>
+        <p class="post-desc">深入理解 Rust 的核心概念——所有权、借用与生命周期，彻底告别内存安全问题。</p>
+        <div class="post-info"><time>2026-03-15</time><span>·</span><span>485 字</span><span>·</span><span>2 分钟阅读</span></div>
+      </header>
+      <div class="post-content markdown-body" id="post-content"><h1>Rust 入门：所有权系统详解</h1>
+<p>Rust 最令人着迷的特性之一就是它的<strong>所有权系统</strong>（Ownership System）。它让 Rust 无需垃圾回收器就能保证内存安全，这在系统编程语言中是极为罕见的。</p>
+<h2>核心三原则</h2>
+<ol>
+<li>Rust 中每个值都有一个<strong>所有者（owner）</strong></li>
+<li>同一时刻只能有<strong>一个所有者</strong></li>
+<li>当所有者离开作用域，值就会被<strong>自动释放</strong></li>
+</ol>
+<h2>移动语义（Move Semantics）</h2>
+<pre><code class="language-rust">let s1 = String::from("hello");
+let s2 = s1; // s1 的所有权移动到 s2
+
+// println!("{}", s1); // ❌ 编译错误！s1 已失效
+println!("{}", s2); // ✅ 正常
+</code></pre>
+<p>这与 C++ 的浅拷贝不同——Rust 在编译期就阻止了悬空指针的产生。</p>
+<h2>借用（Borrowing）</h2>
+<p>当你不想转移所有权时，可以使用<strong>借用</strong>：</p>
+<pre><code class="language-rust">fn calculate_length(s: &amp;String) -&gt; usize {
+    s.len() // 只是借用，不拥有
+}
+
+let s1 = String::from("hello");
+let len = calculate_length(&amp;s1);
+println!("'{}' 的长度是 {}", s1, len); // s1 依然有效
+</code></pre>
+<h2>可变借用的规则</h2>
+<pre><code class="language-rust">let mut s = String::from("hello");
+
+let r1 = &amp;mut s;
+// let r2 = &amp;mut s; // ❌ 同一时刻只能有一个可变借用！
+
+r1.push_str(", world");
+println!("{}", r1);
+</code></pre>
+<p>这个规则从根本上消除了<strong>数据竞争</strong>的可能性。</p>
+<h2>生命周期（Lifetimes）</h2>
+<pre><code class="language-rust">fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() { x } else { y }
+}
+</code></pre>
+<p>生命周期注解告诉编译器引用之间的关系，确保返回的引用始终有效。</p>
+<h2>总结</h2>
+<p>Rust 的所有权系统是一套静态分析规则，在编译期消除了：</p>
+<ul>
+<li>悬空指针（Dangling pointers）</li>
+<li>双重释放（Double free）</li>
+<li>数据竞争（Data races）</li>
+<li>使用已释放内存（Use-after-free）</li>
+</ul>
+<p>初学时会感觉“编译器在和你作对“，但掌握之后你会发现这是世界上最好的代码审查员。</p>
+</div>
+      <footer class="post-footer"><a href="/" class="btn-primary">← 返回文章列表</a></footer>
+    </article>
+    <aside class="toc-sidebar" id="toc"><div class="toc-inner glass"><div class="toc-title">目录</div><nav id="toc-nav"></nav></div></aside>
+  </div>
+  <script src="/post.js?v=3"></script>
+</body>
+</html>

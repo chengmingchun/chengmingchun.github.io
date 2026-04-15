@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 时代的架构工程：如何在内网从零构建并落地自己的“规范驱动 (SDD)”自动编码引擎？ — Dev Blog</title>
+  <meta name="description" content="" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css?v=3" />
+</head>
+<body class="post-body">
+  <div id="reading-progress"></div>
+  <nav class="post-nav glass">
+    <a href="/" class="back-btn"><span>←</span> 返回首页</a>
+    <div class="post-nav-meta">
+      <span class="category-badge" style="background: var(--cat-color)">openspec-analysis.md</span>
+      <span class="read-time">☕ 7 分钟阅读</span>
+    </div>
+  </nav>
+  <div class="post-layout">
+    <aside class="tree-sidebar" id="post-tree"><div class="toc-inner glass"><div class="toc-title">分类导航</div><nav id="tree-nav"></nav></div></aside>
+    <article class="post-article">
+      <header class="post-header">
+        <div class="post-tags"><span class="tag">#AI</span><span class="tag">#Agent</span><span class="tag">#LLM</span><span class="tag">#Python</span><span class="tag">#Wails</span><span class="tag">#SDD</span></div>
+        <h1 class="post-title">AI 时代的架构工程：如何在内网从零构建并落地自己的“规范驱动 (SDD)”自动编码引擎？</h1>
+        <p class="post-desc"></p>
+        <div class="post-info"><time>2026-04-15</time><span>·</span><span>2060 字</span><span>·</span><span>7 分钟阅读</span></div>
+      </header>
+      <div class="post-content markdown-body" id="post-content"><h1>【企业内推级】从零手写你自己的 AI 规范驱动开发 (SDD) 引擎</h1>
+<p><em>很多企业的内网环境因为保密要求，无法畅通无阻地使用开源的云端 AI 工程工具（例如 OpenSpec）。本文将带你拆解外部优秀工具的<strong>核心范式（Paradigm）</strong>，教你如何利用极其简单的 Python 引擎和基于 Wails + LLM 直连的架构，手搓一套属于你自己的团队级内网 AI 编码助手闭环！</em></p>
+<hr />
+<h2>1. 为什么我们要建立内部的“规范驱动模式”？</h2>
+<p>当你只用基础请求去调用大模型（比如让它“帮我写个登录页”），模型通常会基于它的海量但不精准的预训练数据乱写一通。当系统一复杂，它对上下文的**“记忆污染”和“幻觉”**就无法避免。</p>
+<p>真正的 AI 工业化落地，关键不是大模型的底座有多强，而是<strong>你如何写一套 Agent 系统来给大模型套上“护栏”</strong>。
+这个护栏就是 <strong>SDD (Spec-Driven Development)</strong> —— <strong>禁止大模型直接改代码，先生成“架构草图”和“任务清单”，再一步步严格按照任务清单生成原子级代码。</strong></p>
+<p>在这个范式下，所有的上下文会变成结构化的 Markdown 文件。即使你的 AI 是本地运行的开源模型（如 Qwen 或 Llama3），有了 SDD 范式，其工程能力也能媲美直接用网页版的 GPT-4。</p>
+<hr />
+<h2>2. 范式拆解：用 Python 模拟从 0 到 1 构建 SDD 引擎</h2>
+<p>我们无需依赖任何外部依赖，只需要理解流程即可。下面我们用最简单的 Python 代码来展示如何自己写一个大模型中控引擎。</p>
+<h3>Step 1: 【内存持久化】动态构建系统规则约束</h3>
+<p>不要让模型在漫长的聊天里记住规范，我们要在每次发请求前，从磁盘读取核心架构文档。</p>
+<pre><code class="language-python">import os
+
+class InternalSDDEngine:
+    def __init__(self, workspace, llm_client):
+        self.workspace = workspace
+        self.sys_specs_dir = os.path.join(workspace, "docs/specs_current")
+        self.llm = llm_client
+
+    def load_system_memory(self):
+        """
+        核心理念：读取系统基础架构、数据模型作为绝对客观的参照物，避免幻觉。
+        在面试时这就是所谓的 Structural Context Injection (结构化上下文注入)。
+        """
+        memory = "【强制规范：所有的代码编写必须以此为底座】\n"
+        sys_files = ["Architecture.md", "Database_Schemas.md", "UI_Design_Tokens.md"]
+        
+        for f in sys_files:
+            file_path = os.path.join(self.sys_specs_dir, f)
+            if os.path.exists(file_path):
+                with open(file_path, "r", encoding="utf-8") as file:
+                    memory += f"\n--- {f} ---\n{file.read()}"
+        return memory
+</code></pre>
+<h3>Step 2: 【意图拦截与设计】生成 Proposal 与技术方案</h3>
+<p>当用户提出需求时，引擎<strong>绝对不能直接修改源代码</strong>，而是调用大模型进行技术文档的撰写（模拟大模型的 Chain-of-Thought 思维链）。</p>
+<pre><code class="language-python">    def propose_feature(self, user_intent):
+        """
+        将一句话需求 -&gt; 详细的产品需求文档 (Proposal) 与系统设计 (Design)
+        """
+        system_prompt = self.load_system_memory()
+        
+        prompt = f"""
+        基于当前项目架构，用户期望：{user_intent}。
+        不要出任何代码。请仅仅输出名为 `design.md` 的详细架构方案。
+        并在末尾输出一个严格的执行清单，格式如下：
+        - [ ] 新建 src/auth/login.py，提供登录鉴权路由。
+        - [ ] 修改 src/db/models.py，添加 User 表结构。
+        """
+        
+        # 此时调用大模型（内网的 Ollama 或是企业私有化模型）
+        design_markdown = self.llm.chat(system=system_prompt, user=prompt)
+        
+        # 将设计冻结到硬盘，给人为 Review 和纠错的机会 (Human-in-the-loop)
+        with open(f"{self.workspace}/docs/active_proposal/design_and_tasks.md", "w") as f:
+            f.write(design_markdown)
+</code></pre>
+<h3>Step 3: 【微观原子执行】真正的 RAG 与代码生成</h3>
+<p>业务确认设计无误后，我们就启动<strong>执行图谱调度引擎</strong>。它通过正则提取 <code>[ ]</code> 里的内容，给模型注入极致聚焦的微小上下文。</p>
+<pre><code class="language-python">    import re
+    
+    def execute_tasks_sequentially(self):
+        """
+        这是企业级 Agent 引擎的核心：打散长文本的生成，转化为细粒度的高成功率生成。
+        """
+        with open(f"{self.workspace}/docs/active_proposal/design_and_tasks.md", "r") as f:
+            tasks_content = f.read()
+
+        # 解析未完成任务
+        pending_tasks = re.findall(r'- \[ \] (.+)', tasks_content)
+        
+        for task in pending_tasks:
+            print(f"正在执行原子任务: {task}")
+            
+            # 这里只需把 System Prompt + 这一行 Task 传给大模型，模型基本不可能出错
+            task_prompt = f"请严格完成此独立任务，并返回对应修改的代码：{task}"
+            code_diff = self.llm.chat(system=self.load_system_memory(), user=task_prompt)
+            
+            self.apply_code_to_workspace(code_diff)
+            # 写回打勾状态: '[ ] task' -&gt; '[x] task' (实现省略，这里只表思路)
+            self.mark_task_as_done(task)
+</code></pre>
+<p>通过这段纯手工打造的简单脚本逻辑，你就拥有了自己管控 AI 的主动权。所有的规则由你制定，所有记录在内网版本库中流转。</p>
+<hr />
+<h2>3. 进阶：用 Go (Wails v3) 将引擎 UI 化并直连 LLM</h2>
+<p>命令行脚本虽然硬核，但不好交互。为了做到顶级的前沿展现，你可以利用 Go 语言和 Wails 框架将这套流程变成一个专属桌面客户端。
+相较于上一版只用来展示进度的方法不同，由于 Go 本身是一个极强服务语言，<strong>Wails 的 Backend 可以直接充当我们的 Agent 调度主流程</strong>，并且通过标准库发送网络请求对接大模型。</p>
+<h3>3.1 Go 后端：实现 LLM 并发调用的基础设施</h3>
+<p>我们用核心的 <code>Go</code> 逻辑替代掉刚刚的 <code>Python</code> 脚本，充当我们的<strong>大脑控制器</strong>：</p>
+<pre><code class="language-go">package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	"regexp"
+	"strings"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/ollama" // 内网本地加载模型的首选
+)
+
+type SDDBackendService struct {
+	llmModel llms.Model
+}
+
+func NewSDDBackend() *SDDBackendService {
+	// 连接公司内网的本地模型基座（不泄露数据）
+	llm, err := ollama.New(ollama.WithModel("llama3"))
+	if err != nil {
+		panic(err)
+	}
+	return &amp;SDDBackendService{llmModel: llm}
+}
+
+// Frontend 调用的接口：直接启动 AI 任务生成设计
+func (s *SDDBackendService) StartArchitectDesign(userPrompt string) string {
+    // 假设系统里有读取 context 记忆的 Helper
+	systemSpec := ReadLocalSpecsFile("docs/Architecture.md")
+	
+	prompt := fmt.Sprintf("你是一个架构师。\n系统规则：%s\n\n用户期望：%s\n请生成设计草案和 markdown 格式的 Task list。", systemSpec, userPrompt)
+	
+	// 直连大模型
+	ctx := context.Background()
+	completion, _ := llms.GenerateFromSinglePrompt(ctx, s.llmModel, prompt)
+	
+    // 固化文件
+	os.WriteFile("docs/active_tasks.md", []byte(completion), 0644)
+	return completion 
+}
+</code></pre>
+<h3>3.2 Wails v3 极致体验下的双向绑定流</h3>
+<p>在完成了你的 Go 调度后台后，配合前端的 React 或者纯原生 JS，一切将无比丝滑顺畅。
+Wails v3 可以通过强类型的 API 绑定让界面的用户按钮直接触发这段极其硬核的大模型链条处理。</p>
+<pre><code class="language-javascript">// 在你的毛玻璃前端 (Wails v3) 拦截按钮事件
+document.getElementById('ai-trigger-btn').addEventListener('click', async () =&gt; {
+    const input = document.getElementById('user-input').value;
+    
+    // UI 展示思考动画...
+    showLoadingSpinner("大模型正在进行 Architecture Design 和思维链解析...");
+    
+    // 穿透调用你的 Go Native 引擎 (真正的本地大模型调用，而非模拟数据)
+    const markdownDesign = await window.go.main.SDDBackendService.StartArchitectDesign(input);
+    
+    // 把带有大量 "- [ ]" checklist 的 markdown 转储至页面进度条
+    renderTasksAndProgress(markdownDesign);
+});
+</code></pre>
+<h2>4. 结语：建立你不可逾越的私有技术壁垒</h2>
+<p>当你理解了这个范式之后，你就突破了外部框架的桎梏。</p>
+<ol>
+<li><strong>脱离云端绑定</strong>：通过用 Python 或 Go 手写了类似 <code>InternalSDDEngine</code> 的状态机系统，你的整个团队即刻具备了无需外网即可进行 SDD 智能编程的能力。</li>
+<li><strong>极度灵活</strong>：你的 <code>tasks.md</code> 正则引擎可以随时修改；你可以外挂本地私有的知识库、代码索引器，这是外部 SaaS 产品（甚至像 Cursor ）所给不到你的灵活深度。</li>
+<li><strong>架构思维升华</strong>：面试官问起你懂不懂大模型时，你不再是“我会写提示词”，而是能自研一套架构级 Agent 系统并带有 Mac 原生 GUI —— 这已经处于金字塔级研发工程师段位。</li>
+</ol>
+<p>将规范流程固化入你写好的这套轻量核心机制里，这就是未来资深架构师掌控 AI 的最佳范式。</p>
+</div>
+      <footer class="post-footer"><a href="/" class="btn-primary">← 返回文章列表</a></footer>
+    </article>
+    <aside class="toc-sidebar" id="toc"><div class="toc-inner glass"><div class="toc-title">目录</div><nav id="toc-nav"></nav></div></aside>
+  </div>
+  <script src="/post.js?v=3"></script>
+</body>
+</html>

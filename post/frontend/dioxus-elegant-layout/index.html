@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>在 Dioxus 中打造优雅好看的原生桌面布局与路由 — Dev Blog</title>
+  <meta name="description" content="保姆级教程：手把手教你如何在使用 Rust 的 Dioxus 框架时，构建出类似 Apple 审美的原生桌面侧边栏布局，并无缝结合 Router。" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css?v=3" />
+</head>
+<body class="post-body">
+  <div id="reading-progress"></div>
+  <nav class="post-nav glass">
+    <a href="/" class="back-btn"><span>←</span> 返回首页</a>
+    <div class="post-nav-meta">
+      <span class="category-badge" style="background: var(--cat-color)">Rust</span>
+      <span class="read-time">☕ 5 分钟阅读</span>
+    </div>
+  </nav>
+  <div class="post-layout">
+    <aside class="tree-sidebar" id="post-tree"><div class="toc-inner glass"><div class="toc-title">分类导航</div><nav id="tree-nav"></nav></div></aside>
+    <article class="post-article">
+      <header class="post-header">
+        <div class="post-tags"><span class="tag">#Rust</span><span class="tag">#Dioxus</span><span class="tag">#UI设计</span><span class="tag">#前端</span></div>
+        <h1 class="post-title">在 Dioxus 中打造优雅好看的原生桌面布局与路由</h1>
+        <p class="post-desc">保姆级教程：手把手教你如何在使用 Rust 的 Dioxus 框架时，构建出类似 Apple 审美的原生桌面侧边栏布局，并无缝结合 Router。</p>
+        <div class="post-info"><time>2026-04-09</time><span>·</span><span>1327 字</span><span>·</span><span>5 分钟阅读</span></div>
+      </header>
+      <div class="post-content markdown-body" id="post-content"><h1>在 Dioxus 中打造优雅好看的原生桌面布局与路由</h1>
+<p>很多刚接触 Rust GUI 框架的小白在看到 Dioxus 时，不仅会惊叹于它和 React 极其相似的开发体验，还会对它小巧的体积爱不释手。但是面对复杂的桌面端项目，如何<strong>优雅地组织路由</strong>并<strong>设计一套高颜值的（类似 Apple 风格的）视觉框架</strong>呢？</p>
+<p>这篇文章就是为你准备的保姆级教程！我们将从零开始，使用最容易懂的姿势，实现一个带有左侧全局导航（Sidebar）+ 右侧局部切换的丝滑布局。</p>
+<h2>💡 第一步：理解现代化的视觉语言</h2>
+<p>想要做出来的软件看起来“高级”和“优雅”，不需要海量的自定义样式，秘诀主要在于这三点：</p>
+<ol>
+<li><strong>毛玻璃特效（Glassmorphism）</strong>：使用带透明度的白底色加上 <code>backdrop-filter</code>。</li>
+<li><strong>平滑的圆角和长阴影</strong>：让组件呈现“呼吸感”，避免死板。</li>
+<li><strong>优秀的字体排版（Typography）</strong>：使用无衬线系统原生字体（如 macOS 的 SF Pro）。</li>
+</ol>
+<p>为了能够在 Dioxus 中随时随地使用这套 UI 语言，最简单的方式就是定义一个 <code>GLOBAL_CSS</code> 全局字符串，然后一次性挂载在根组件上：</p>
+<pre><code class="language-rust">const GLOBAL_CSS: &amp;str = r#"
+    body {
+        /* 使用系统默认的现代美观无衬线字体 */
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #F5F5F7; /* 苹果生态常用的浅灰护眼底色 */
+        color: #1D1D1F;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* 只要给 div 挂上 card 这个 class，马上就能获得高级感 */
+    .card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 18px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        padding: 32px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    /* 把普通的链接打造成按钮的样子 */
+    .sidebar-link {
+        padding: 14px 16px; 
+        border-radius: 12px; 
+        color: #1d1d1f; 
+        text-decoration: none; 
+        font-weight: 600; 
+        transition: all 0.2s ease;
+    }
+    .sidebar-link:hover {
+        background: rgba(0, 122, 255, 0.08); /* 淡蓝色划过效果 */
+        color: #007AFF;
+        transform: translateX(4px); /* 微妙的位移动画感 */
+    }
+"#;
+</code></pre>
+<h2>🗺️ 第二步：无死角的页面结构与路由（Router）</h2>
+<p>对于桌面端工具，我们希望左侧导航栏（Sidebar）是<strong>固定不动的</strong>，只有点选了左侧菜单，右侧的内容页才发生跳转和变化。</p>
+<h3>1. 定义 Dioxus 路由枚举</h3>
+<p>利用 Dioxus 自带的强大 <code>Routable</code> 宏，我们用枚举将所有要展示的页面列出来：</p>
+<pre><code class="language-rust">use dioxus::prelude::*;
+
+#[derive(Clone, Routable, Debug, PartialEq)]
+pub enum Route {
+    // 默认指向主控台
+    #[route("/")]
+    Home {},
+    
+    // 指向其他的设置页面
+    #[route("/settings")]
+    Settings {},
+}
+</code></pre>
+<h3>2. 制作一个绝对吸附的侧边栏</h3>
+<p>小白经常苦恼于“侧边栏怎么能固定在左边？”其实只需要简简单单的一句 CSS 绝对定位即可 <code>position: fixed</code>：</p>
+<pre><code class="language-rust">#[component]
+fn Sidebar() -&gt; Element {
+    rsx! {
+        div {
+            // 控制宽度固定，高度撑满屏幕，并强制固定在左侧
+            style: "width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background-color: rgba(255, 255, 255, 0.7); border-right: 1px solid rgba(0,0,0,0.05); padding: 35px 25px; display: flex; flex-direction: column; gap: 15px; box-sizing: border-box; backdrop-filter: blur(20px);",
+            
+            h2 { "✨ 我的桌面应用" }
+            
+            // 使用上面写的 CSS class，并且让 link 跳转时带有高亮体验
+            Link { to: Route::Home {}, class: "sidebar-link", "🏠 返回主页" }
+            Link { to: Route::Settings {}, class: "sidebar-link", "⚙️ 个性配置" }
+        }
+    }
+}
+</code></pre>
+<h2>🔧 第三步：最关键的技巧 —— 容器包裹组件</h2>
+<p>如果你想让右边的页面内容展示出来，又不想每次都在不同页面里复制粘贴一遍 <code>&lt;Sidebar /&gt;</code> 的代码，最好的方法是手写一个“带有子元素插槽”的包裹器（Wrapper）：</p>
+<pre><code class="language-rust">#[component]
+fn PageLayout(children: Element) -&gt; Element {
+    rsx! {
+        div {
+            style: "display: flex; min-height: 100vh; width: 100vw; overflow-x: hidden;",
+            
+            // 这一行渲染了上面的万年不动侧边栏
+            Sidebar {}
+            
+            // 这里是给右边动态内容的舞台
+            div {
+                // 左侧预留了 260px 给 Sidebar
+                style: "flex: 1; padding: 50px; margin-left: 260px; box-sizing: border-box;",
+                // 渲染外部丢进来的页面组件！
+                {children}
+            }
+        }
+    }
+}
+</code></pre>
+<h2>🎉 第四步：写页面并享受成果！</h2>
+<p>一切地基准备就绪！现在，当我们去编写真正的页面逻辑时，只需把我们的核心 UI 用刚修好的 <code>&lt;PageLayout&gt;</code> 包成一个汉堡：</p>
+<pre><code class="language-rust">// 入口函数挂载路由
+fn App() -&gt; Element {
+    rsx! {
+        style { "{GLOBAL_CSS}" }
+        Router::&lt;Route&gt; {}
+    }
+}
+
+// 具体页面
+#[component]
+fn Home() -&gt; Element {
+    rsx! {
+        PageLayout { // 👈 召唤布局容器大魔法
+            div {
+                class: "card", // 👈 召唤毛玻璃大魔法
+                h1 { "欢迎来到新世界 🌊" }
+                p { "配合左侧丝滑的阴影与悬停效果，你的 Rust 程序绝对比 Electron 还会打动用户！" }
+            }
+        }
+    }
+}
+</code></pre>
+<h2>结尾</h2>
+<p>就这样，只用最纯粹的基础 RSX 和极简的内联 CSS 原理配置，我们打造了一套不仅非常轻量、没有任何多余前端依赖，而且<strong>视觉呈现极具震撼力</strong>的成熟桌面端布局！</p>
+<p>去试试看吧！使用 Dioxus 这个魔法棒重新定义你的下一款应用吧！</p>
+</div>
+      <footer class="post-footer"><a href="/" class="btn-primary">← 返回文章列表</a></footer>
+    </article>
+    <aside class="toc-sidebar" id="toc"><div class="toc-inner glass"><div class="toc-title">目录</div><nav id="toc-nav"></nav></div></aside>
+  </div>
+  <script src="/post.js?v=3"></script>
+</body>
+</html>

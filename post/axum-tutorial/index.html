@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>极简入坑指南：用 Rust Axum 优雅托管 API 与前端博客 — Dev Blog</title>
+  <meta name="description" content="这是一篇写给前端小白的 Rust 后端入门指南。看看我们如何用几十行代码打造一个高并发且优雅的静态页面与 API 双轨托管程序。" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css?v=3" />
+</head>
+<body class="post-body">
+  <div id="reading-progress"></div>
+  <nav class="post-nav glass">
+    <a href="/" class="back-btn"><span>←</span> 返回首页</a>
+    <div class="post-nav-meta">
+      <span class="category-badge" style="background: var(--cat-color)">Rust</span>
+      <span class="read-time">☕ 4 分钟阅读</span>
+    </div>
+  </nav>
+  <div class="post-layout">
+    <aside class="tree-sidebar" id="post-tree"><div class="toc-inner glass"><div class="toc-title">分类导航</div><nav id="tree-nav"></nav></div></aside>
+    <article class="post-article">
+      <header class="post-header">
+        <div class="post-tags"><span class="tag">#Rust</span><span class="tag">#Axum</span><span class="tag">#后端</span><span class="tag">#全栈</span></div>
+        <h1 class="post-title">极简入坑指南：用 Rust Axum 优雅托管 API 与前端博客</h1>
+        <p class="post-desc">这是一篇写给前端小白的 Rust 后端入门指南。看看我们如何用几十行代码打造一个高并发且优雅的静态页面与 API 双轨托管程序。</p>
+        <div class="post-info"><time>2026-04-03</time><span>·</span><span>1089 字</span><span>·</span><span>4 分钟阅读</span></div>
+      </header>
+      <div class="post-content markdown-body" id="post-content"><h1>极简入坑指南：用 Rust Axum 优雅托管 API 与前端博客</h1>
+<p>提到 Rust 后端，很多人会被复杂的生命周期和晦涩的数据结构劝退。但实际上，借助当前最强大的生态框架之一 <strong>Axum</strong>，搭建一个同时能提供数据接口（API）和托管前端静态网站的服务，简直像喝水一样自然。</p>
+<p>今天，我们就以本博客的后端实现为例，带你拆解这个优雅、极速的“双轨制”后端代码。</p>
+<hr />
+<h2>1. 为什么是 Axum？</h2>
+<p>Axum 是由官方 Tokio 异步框架团队开发的原生 Web 框架。它的核心理念就是<strong>利用 Router（路由）组装各类服务</strong>。更棒的是，它能够和塔层（<code>tower_http</code>）完美结合，让你轻松拥有文件托管、CORS 跨域、日志记录等企业级功能。</p>
+<hr />
+<h2>2. 核心架构拆解</h2>
+<p>我们的目标很简单：</p>
+<ol>
+<li><strong>提供接口</strong>：通过 <code>/api/posts</code> 返回全部文章信息。</li>
+<li><strong>托管前端</strong>：把普通的 HTML / CSS / JS 原样发给客户端（浏览器）。</li>
+</ol>
+<h3>第一步：设置路由树 (Router)</h3>
+<p>在 Axum 中，构建后端其实就是在拼装一棵“路由树”。</p>
+<pre><code class="language-rust">use axum::{routing::get, Router};
+
+// 第一步：定义你的路由
+let app = Router::new()
+    // 凡是访问 /api/posts 的，都交给 api_posts 这个函数处理
+    .route("/api/posts", get(api_posts))
+    // 文章内容的动态抓取接口
+    .route("/api/posts/*slug", get(api_post));
+</code></pre>
+<p>这里的 <code>api_posts</code> 是一个普通的异步函数，它会扫描本地的 <code>posts</code> 目录解析 markdown，并将其自动打包为 JSON 发送给前端：</p>
+<pre><code class="language-rust">use axum::Json;
+
+// Axum 会自动把返回的结构体序列化成标准的 JSON 格式！
+async fn api_posts() -&gt; Json&lt;serde_json::Value&gt; {
+    let posts = scan_my_markdown_files(); 
+    Json(serde_json::json!({ "posts": posts }))
+}
+</code></pre>
+<h3>第二步：用 ServeDir 优雅托管前端</h3>
+<p>如果只有后端接口，显然不够。我们要把编译好的前端页面（如本博客的 <code>index.html</code>，<code>style.css</code>）展示给用户。</p>
+<p>对于小白来说，不用自己手写读取文件内容的函数！<code>tower_http</code> 中的 <code>ServeDir</code> 就是为此而生的：</p>
+<pre><code class="language-rust">use tower_http::services::ServeDir;
+
+let app = Router::new()
+    .route("/api/posts", get(api_posts))
+    // 神来之笔：把没被上面拦截的所有路径，都指向本地的 "./static" 文件夹
+    .nest_service("/", ServeDir::new("static").fallback(ServeDir::new("static")));
+</code></pre>
+<p>这段代码极为优雅：</p>
+<ul>
+<li>只要请求没有匹配到 <code>/api/</code> 路径，Axum 就会自动去找你本地当前目录下的 <code>static/</code> 文件夹。</li>
+<li>比如浏览器访问 <code>/style.css</code>，就会自动返回 <code>static/style.css</code>，连 MIME 类型都会自动帮你算好！</li>
+</ul>
+<h3>第三步：起爆服务器</h3>
+<p>最后，我们需要绑定并监听一个网络端口（例如 <code>0.0.0.0:3000</code>），把刚才的 <code>app</code> 交给服务器去跑：</p>
+<pre><code class="language-rust">#[tokio::main] // 启动 Tokio 异步运行时
+async fn main() {
+    // 省略刚才我们组装 app 的代码...
+
+    // 绑定本地端口 3000
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")
+        .await
+        .expect("无法绑定端口");
+
+    println!("🚀 Blog 服务器运行在 http://localhost:3000");
+    
+    // 开始接收用户的网络请求并处理
+    axum::serve(listener, app).await.unwrap();
+}
+</code></pre>
+<hr />
+<h2>3. 把状态安全地传递给后端 (State)</h2>
+<p>有时候我们需要保持某种状态（比如：博客文章目录的具体路径，或者数据库连接）。在 Node/Express 中你可能直接定义一个全局变量，但这在 Rust 的多线程环境下是不安全的。</p>
+<p>Axum 提供极好的 <code>State</code> 支持：</p>
+<pre><code class="language-rust">// 定义你的状态
+struct AppState {
+    posts_dir: PathBuf,
+}
+
+// 把它包裹在线程安全的 Arc 共享指针里
+let state = Arc::new(AppState { posts_dir: PathBuf::from("posts") });
+
+// 把它注入给 Router
+let app = Router::new()
+    ...
+    .with_state(state);
+</code></pre>
+<p>当你在 <code>api_posts</code> 里需要这个路径时，只需要在函数签名里加一个提取器 (<code>Extractor</code>)：</p>
+<pre><code class="language-rust">use axum::extract::State;
+
+async fn api_posts(State(state): State&lt;Arc&lt;AppState&gt;&gt;) -&gt; Json&lt;serde_json::Value&gt; {
+    // 这里你直接可以通过 state.posts_dir 安全地获取目录啦
+}
+</code></pre>
+<h2>总结</h2>
+<p>这就是全部魔法了！
+没有繁琐的配置文件，没有庞大厚重的类对象体系，我们只需要 <strong>Router、Handler 聚合数据、ServeDir 兜底前端</strong>。几十行极简代码，我们就能完美承托起这个运行如飞的全栈小应用。</p>
+</div>
+      <footer class="post-footer"><a href="/" class="btn-primary">← 返回文章列表</a></footer>
+    </article>
+    <aside class="toc-sidebar" id="toc"><div class="toc-inner glass"><div class="toc-title">目录</div><nav id="toc-nav"></nav></div></aside>
+  </div>
+  <script src="/post.js?v=3"></script>
+</body>
+</html>

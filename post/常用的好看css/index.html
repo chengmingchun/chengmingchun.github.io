@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>常用的好看 CSS 样式合集 — Dev Blog</title>
+  <meta name="description" content="收集整理了常用的精美 CSS 样式，包括按钮、表格、输入框、布局等多种组件样式，可直接复制使用。" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css?v=3" />
+</head>
+<body class="post-body">
+  <div id="reading-progress"></div>
+  <nav class="post-nav glass">
+    <a href="/" class="back-btn"><span>←</span> 返回首页</a>
+    <div class="post-nav-meta">
+      <span class="category-badge" style="background: var(--cat-color)">前端</span>
+      <span class="read-time">☕ 9 分钟阅读</span>
+    </div>
+  </nav>
+  <div class="post-layout">
+    <aside class="tree-sidebar" id="post-tree"><div class="toc-inner glass"><div class="toc-title">分类导航</div><nav id="tree-nav"></nav></div></aside>
+    <article class="post-article">
+      <header class="post-header">
+        <div class="post-tags"><span class="tag">#CSS</span><span class="tag">#样式</span><span class="tag">#UI设计</span><span class="tag">#组件</span></div>
+        <h1 class="post-title">常用的好看 CSS 样式合集</h1>
+        <p class="post-desc">收集整理了常用的精美 CSS 样式，包括按钮、表格、输入框、布局等多种组件样式，可直接复制使用。</p>
+        <div class="post-info"><time>2024-07-20</time><span>·</span><span>2436 字</span><span>·</span><span>9 分钟阅读</span></div>
+      </header>
+      <div class="post-content markdown-body" id="post-content"><p>[toc]</p>
+<h3>按钮样式</h3>
+<ol>
+<li>蓝色圆角按钮</li>
+</ol>
+<style>
+.demo-button-1 {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+.demo-button-1:hover {
+    background-color: #0056b3;
+}
+</style>
+<p><button class="demo-button-1">Click me</button></p>
+<pre><code class="language-css">button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+</code></pre>
+<ol start="2">
+<li>渐变悬浮按钮</li>
+</ol>
+<style>
+.demo-button-2 {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.4em 0.8em;
+  background: linear-gradient(135deg, #bfbec0 0%, #d2d3d3 100%);
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+.demo-button-2:hover {
+  border-color: #646cff;
+  background: linear-gradient(135deg, #d2d3d3 0%, #bfbec0 100%);
+}
+.demo-button-2:focus,
+.demo-button-2:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+</style>
+<p><button class="demo-button-2">Click me</button></p>
+<pre><code class="language-css">button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.4em 0.8em;
+  background: linear-gradient(135deg, #bfbec0 0%, #d2d3d3 100%);
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+  background: linear-gradient(135deg, #d2d3d3 0%, #bfbec0 100%);
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+</code></pre>
+<ol start="3">
+<li>渐变光泽按钮（Link 样式）</li>
+</ol>
+<style>
+.demo-link-1 {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #333;
+    background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.demo-link-1::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: skew(20deg);
+    transition: left 0.3s ease;
+}
+.demo-link-1:hover::before {
+    left: 100%;
+}
+.demo-link-1:hover {
+    background: linear-gradient(45deg, #96fbc4 0%, #f9f586 99%, #f9f586 100%);
+    color: #333;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+.demo-link-1:active {
+    top: 2px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+.demo-link-1::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #fff;
+    transform: scale(0, 1);
+    transform-origin: right center;
+    transition: transform 0.3s ease;
+}
+.demo-link-1:hover::after {
+    transform: scale(1, 1);
+    transform-origin: left center;
+}
+.demo-link-1 span {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+.demo-link-1:hover span {
+    transform: skew(-20deg);
+}
+</style>
+<p><a href="#" class="demo-link-1"><span>Hover me</span></a></p>
+<pre><code class="language-css">a {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #333;
+    background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+    border: none;
+    border-radius: 10px;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: skew(20deg);
+    transition: left 0.3s ease;
+}
+
+a:hover::before {
+    left: 100%;
+}
+
+a:hover {
+    background: linear-gradient(45deg, #96fbc4 0%, #f9f586 99%, #f9f586 100%);
+    color: #333;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+a:active {
+    top: 2px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #fff;
+    transform: scale(0, 1);
+    transform-origin: right center;
+    transition: transform 0.3s ease;
+}
+
+a:hover::after {
+    transform: scale(1, 1);
+    transform-origin: left center;
+}
+
+a span {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+a:hover span {
+    transform: skew(-20deg);
+}
+</code></pre>
+<ol start="4">
+<li>蓝色悬停按钮</li>
+</ol>
+<style>
+.demo-link-2 {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 10px 0;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+.demo-link-2:hover,
+.demo-link-2:focus {
+    background-color: #0056b3;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+.demo-link-2:active {
+    background-color: #004494;
+    transform: translateY(1px);
+}
+.demo-link-2:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+</style>
+<p><a href="#" class="demo-link-2">Click me</a></p>
+<pre><code class="language-css">a {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 10px 0;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+a:hover,
+a:focus {
+    background-color: #0056b3;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+a:active {
+    background-color: #004494;
+    transform: translateY(1px);
+}
+
+a:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+</code></pre>
+<ol start="5">
+<li>浅灰立体按钮</li>
+</ol>
+<style>
+.demo-button-3 {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #333;
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+.demo-button-3::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.05);
+    transform: skew(20deg);
+    transition: left 0.3s ease;
+}
+.demo-button-3:hover::before {
+    left: 100%;
+}
+.demo-button-3:hover {
+    background: #e9e9e9;
+    color: #222;
+    border-color: #bbb;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+.demo-button-3:active {
+    top: 1px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.demo-button-3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #333;
+    transform: scale(0, 1);
+    transform-origin: right center;
+    transition: transform 0.3s ease;
+}
+.demo-button-3:hover::after {
+    transform: scale(1, 1);
+    transform-origin: left center;
+}
+.demo-button-3 span {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+.demo-button-3:hover span {
+    transform: skew(-10deg);
+}
+</style>
+<p><button class="demo-button-3"><span>Hover me</span></button></p>
+<pre><code class="language-css">button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #333;
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.05);
+    transform: skew(20deg);
+    transition: left 0.3s ease;
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+button:hover {
+    background: #e9e9e9;
+    color: #222;
+    border-color: #bbb;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+button:active {
+    top: 1px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+button::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #333;
+    transform: scale(0, 1);
+    transform-origin: right center;
+    transition: transform 0.3s ease;
+}
+
+button:hover::after {
+    transform: scale(1, 1);
+    transform-origin: left center;
+}
+
+button span {
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+button:hover span {
+    transform: skew(-10deg);
+}
+</code></pre>
+<h3>表格样式</h3>
+<ol>
+<li>基础表格样式</li>
+</ol>
+<style>
+.demo-table-1 {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+.demo-table-1 thead {
+    background-color: #007bff;
+    color: #fff;
+}
+.demo-table-1 th,
+.demo-table-1 td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+.demo-table-1 tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+.demo-table-1 tbody tr:hover {
+    background-color: #f1f1f1;
+}
+</style>
+<table class="demo-table-1">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+            <th>City</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>John</td>
+            <td>25</td>
+            <td>New York</td>
+        </tr>
+        <tr>
+            <td>Jane</td>
+            <td>30</td>
+            <td>Los Angeles</td>
+        </tr>
+    </tbody>
+</table>
+<pre><code class="language-css">table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table thead {
+    background-color: #007bff;
+    color: #fff;
+}
+
+table th,
+table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+table tbody tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+</code></pre>
+<ol start="2">
+<li>现代卡片表格</li>
+</ol>
+<style>
+.demo-table-2 {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 50px 0;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.demo-table-2 thead {
+    background-color: #f5f5f5;
+}
+.demo-table-2 th,
+.demo-table-2 td {
+    padding: 20px;
+    text-align: center;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+.demo-table-2 th {
+    font-weight: 500;
+    color: #333;
+}
+.demo-table-2 td {
+    font-weight: 300;
+    color: #666;
+}
+.demo-table-2 tbody tr {
+    border-bottom: 1px solid #eaeaea;
+}
+.demo-table-2 tbody tr:last-child {
+    border-bottom: none;
+}
+.demo-table-2 tbody tr:hover {
+    background-color: #e9e9e9;
+}
+.demo-table-2 a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+}
+.demo-table-2 a:hover {
+    text-decoration: underline;
+}
+.demo-table-2 th:first-child,
+.demo-table-2 td:first-child {
+    border-radius: 8px 0 0 8px;
+}
+.demo-table-2 th:last-child,
+.demo-table-2 td:last-child {
+    border-radius: 0 8px 8px 0;
+}
+.demo-table-2 th:first-child,
+.demo-table-2 th:last-child {
+    width: 20%;
+}
+</style>
+<table class="demo-table-2">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Stock</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>MacBook Pro</td>
+            <td>$1,999</td>
+            <td>15</td>
+        </tr>
+        <tr>
+            <td>iPhone 15</td>
+            <td>$999</td>
+            <td>42</td>
+        </tr>
+        <tr>
+            <td>AirPods Pro</td>
+            <td>$249</td>
+            <td>88</td>
+        </tr>
+    </tbody>
+</table>
+<pre><code class="language-css">table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 50px 0;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+table thead {
+    background-color: #f5f5f5;
+}
+
+table th,
+table td {
+    padding: 20px;
+    text-align: center;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+table th {
+    font-weight: 500;
+    color: #333;
+}
+
+table td {
+    font-weight: 300;
+    color: #666;
+}
+
+table tbody tr {
+    border-bottom: 1px solid #eaeaea;
+}
+
+table tbody tr:last-child {
+    border-bottom: none;
+}
+
+table tbody tr:hover {
+    background-color: #e9e9e9;
+}
+
+table a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+table a:hover {
+    text-decoration: underline;
+}
+
+table th:first-child,
+table td:first-child {
+    border-radius: 8px 0 0 8px;
+}
+
+table th:last-child,
+table td:last-child {
+    border-radius: 0 8px 8px 0;
+}
+
+table th:first-child,
+table th:last-child {
+    width: 20%;
+}
+</code></pre>
+<ol start="3">
+<li>渐变表头表格</li>
+</ol>
+<style>
+.demo-table-3 {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 50px 0;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+.demo-table-3 thead {
+    background: linear-gradient(135deg, #6e45e2 0%, #88d3ce 100%);
+}
+.demo-table-3 th,
+.demo-table-3 td {
+    padding: 20px;
+    text-align: center;
+    border: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.demo-table-3 th {
+    font-weight: 500;
+    color: #fff;
+}
+.demo-table-3 td {
+    font-weight: 300;
+    color: #666;
+    position: relative;
+}
+.demo-table-3 tbody tr {
+    border-bottom: 1px solid #eaeaea;
+}
+.demo-table-3 tbody tr:last-child {
+    border-bottom: none;
+}
+.demo-table-3 tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.demo-table-3 a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+.demo-table-3 a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+.demo-table-3 th:first-child,
+.demo-table-3 td:first-child {
+    border-radius: 10px 0 0 10px;
+}
+.demo-table-3 th:last-child,
+.demo-table-3 td:last-child {
+    border-radius: 0 10px 10px 0;
+}
+</style>
+<table class="demo-table-3">
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>Status</th>
+            <th>Uptime</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>API Server</td>
+            <td>Online</td>
+            <td>99.9%</td>
+        </tr>
+        <tr>
+            <td>Database</td>
+            <td>Online</td>
+            <td>99.8%</td>
+        </tr>
+        <tr>
+            <td>Cache</td>
+            <td>Online</td>
+            <td>99.5%</td>
+        </tr>
+    </tbody>
+</table>
+<pre><code class="language-css">table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 50px 0;
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+table thead {
+    background: linear-gradient(135deg, #6e45e2 0%, #88d3ce 100%);
+}
+
+table th,
+table td {
+    padding: 20px;
+    text-align: center;
+    border: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+table th {
+    font-weight: 500;
+    color: #fff;
+}
+
+table td {
+    font-weight: 300;
+    color: #666;
+    position: relative;
+}
+
+table tbody tr {
+    border-bottom: 1px solid #eaeaea;
+}
+
+table tbody tr:last-child {
+    border-bottom: none;
+}
+
+table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+table a {
+    color: #007BFF;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+table a:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+table th:first-child,
+table td:first-child {
+    border-radius: 10px 0 0 10px;
+}
+
+table th:last-child,
+table td:last-child {
+    border-radius: 0 10px 10px 0;
+}
+</code></pre>
+<ol start="4">
+<li>悬浮列表卡片</li>
+</ol>
+<style>
+.demo-ul-1 {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.demo-ul-1 li {
+    background-color: #f4f4f4;
+    border-radius: 4px;
+    padding: 10px 20px;
+    margin: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+.demo-ul-1 li:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+</style>
+<ul class="demo-ul-1">
+    <li>HTML</li>
+    <li>CSS</li>
+    <li>JavaScript</li>
+    <li>React</li>
+    <li>Vue</li>
+</ul>
+<pre><code class="language-css">ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+li {
+    background-color: #f4f4f4;
+    border-radius: 4px;
+    padding: 10px 20px;
+    margin: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+li:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+</code></pre>
+<h4>输入框</h4>
+<ol>
+<li>下划线输入框</li>
+</ol>
+<style>
+.demo-input-1 {
+    width: 200px;
+    padding: 15px 20px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    background-color: transparent;
+    font-size: 16px;
+    color: #333;
+    text-align: center;
+    transition: border-color 0.3s ease, border-width 0.3s ease, box-shadow 0.3s ease;
+}
+.demo-input-1:focus {
+    width: 250px;
+    outline: none;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    border-image: linear-gradient(to right, #999, #ccc) 1;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+.demo-input-1::placeholder {
+    color: #ccc;
+    transition: color 0.3s ease;
+}
+.demo-input-1:focus::placeholder {
+    color: #999;
+}
+.demo-input-1:hover {
+    width: 250px;
+    border-bottom: 2px solid #ccc;
+}
+</style>
+<input type="text" class="demo-input-1" placeholder="Type here...">
+<pre><code class="language-css">input {
+    width: 5%;
+    padding: 15px 20px;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    background-color: transparent;
+    font-size: 16px;
+    color: #333;
+    text-align: center;
+    transition: border-color 0.3s ease, border-width 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus {
+    width: 10%;
+    outline: none;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    border-image: linear-gradient(to right, #999, #ccc) 1;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+input::placeholder {
+    color: #ccc;
+    transition: color 0.3s ease;
+}
+
+input:focus::placeholder {
+    color: #999;
+}
+
+input:hover {
+    width: 10%;
+    border-bottom: 2px solid #ccc;
+}
+</code></pre>
+<ol start="2">
+<li>透明搜索框</li>
+</ol>
+<style>
+.demo-input-2 {
+    flex-grow: 1;
+    border: none;
+    background-color: transparent;
+    color: #000;
+    outline: none;
+    padding: 10px;
+    font-size: 16px;
+}
+.demo-input-2::placeholder {
+    color: #aaa;
+}
+.demo-input-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    padding: 5px 15px;
+    background-color: #fff;
+    max-width: 300px;
+}
+.demo-input-container svg {
+    width: 20px;
+    height: 20px;
+    color: #aaa;
+    margin-right: 8px;
+}
+</style>
+<div class="demo-input-container">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    </svg>
+    <input type="text" class="demo-input-2" placeholder="Search...">
+</div>
+<pre><code class="language-css">input {
+    flex-grow: 1;
+    border: none;
+    background-color: transparent;
+    color: #000;
+    outline: none;
+}
+
+input::placeholder {
+    color: #aaa;
+}
+</code></pre>
+<h4>链接样式</h4>
+<ol>
+<li>简约链接</li>
+</ol>
+<style>
+.demo-link-3 {
+    display: inline-block;
+    padding: 8px 15px;
+    font-size: 16px;
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+.demo-link-3:hover {
+    color: #007BFF;
+    cursor: pointer;
+    transform: translateY(-2px);
+    text-decoration: underline;
+}
+.demo-link-3:active {
+    transform: translateY(1px);
+}
+</style>
+<p><a href="#" class="demo-link-3">Learn more →</a></p>
+<pre><code class="language-css">a {
+    display: inline-block;
+    padding: 8px 15px;
+    font-size: 16px;
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #007BFF;
+    cursor: pointer;
+    transform: translateY(-2px);
+    text-decoration: underline;
+}
+
+a:active {
+    transform: translateY(1px);
+}
+</code></pre>
+<h3>布局</h3>
+<ol>
+<li>居中布局</li>
+</ol>
+<style>
+.demo-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+}
+</style>
+<div class="demo-center">Centered Content</div>
+<pre><code class="language-css">/* 容器样式 */
+.input-container  {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 5vh; /* 使用视口高度使容器占满整个屏幕高度 */
+    margin: 0;
+    padding: 0;
+}
+</code></pre>
+<ol start="2">
+<li>卡片布局</li>
+</ol>
+<style>
+.demo-card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding: 20px;
+    background: white;
+    max-width: 300px;
+}
+.demo-card h4 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+.demo-card p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+</style>
+<div class="demo-card">
+    <h4>Card Title</h4>
+    <p>This is a simple card component with shadow and rounded corners.</p>
+</div>
+<pre><code class="language-css">.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    padding: 10px;
+}
+</code></pre>
+</div>
+      <footer class="post-footer"><a href="/" class="btn-primary">← 返回文章列表</a></footer>
+    </article>
+    <aside class="toc-sidebar" id="toc"><div class="toc-inner glass"><div class="toc-title">目录</div><nav id="toc-nav"></nav></div></aside>
+  </div>
+  <script src="/post.js?v=3"></script>
+</body>
+</html>
