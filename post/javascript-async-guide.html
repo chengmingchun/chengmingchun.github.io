@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#3157d5">
+  <meta name="description" content="重写 2020 年旧笔记，补齐微任务、错误传播、并发控制与常见误区。">
+  <link rel="canonical" href="https://chengmingchun.github.io/post/javascript-async-guide.html">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('site-theme')||((matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light')}catch(e){}</script>
+  <script src="/js/site.js" defer></script>
+  <title>Promise 与 async/await：从状态机理解异步控制流 · 程明春的工程笔记</title>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header"><nav class="nav-shell" aria-label="主导航"><a class="brand" href="/"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a><button class="icon-button menu-button" type="button" data-menu-toggle aria-expanded="false" aria-label="展开导航">☰</button><div class="nav-links" data-nav><a href="/">首页</a><a href="/post/">文章</a><a href="/categories/">专题</a><a href="/about/">关于</a><button class="icon-button" type="button" data-theme-toggle aria-label="切换主题">☾</button></div></nav></header>
+<div class="reading-progress" data-reading-progress></div>
+<main id="main" class="article-shell">
+  <header class="article-header"><p class="eyebrow">基础与算法</p><h1>Promise 与 async/await：从状态机理解异步控制流</h1><p class="article-summary">重写 2020 年旧笔记，补齐微任务、错误传播、并发控制与常见误区。</p><div class="article-meta"><span>更新于 2026-07-10</span><span>约 10 分钟</span><span>程明春</span></div></header>
+  <nav class="toc" aria-label="文章目录"><strong>本文目录</strong><ol><li><a href="#promise">Promise 是状态机</a></li><li><a href="#microtask">微任务顺序</a></li><li><a href="#error">错误传播</a></li><li><a href="#concurrency">并发控制</a></li><li><a href="#pitfalls">常见误区</a></li></ol></nav>
+  <article class="article-body">
+<p>旧版“实习小结”把 Promise、async/await、Vuex 和 Ajax 混在一篇文章里，知识点很多但缺少主线。这里保留最有长期价值的主题：如何从状态机和事件循环理解 JavaScript 异步控制流。</p>
+<h2 id="promise">一、Promise 是一次性状态机</h2><p>Promise 只有 <code>pending</code>、<code>fulfilled</code>、<code>rejected</code> 三种状态，且一旦落定不可再次变化。构造器中的函数会同步执行，<code>then</code> 注册的回调则进入微任务队列。</p>
+<pre><code>const task = new Promise((resolve) => {
+  console.log('executor');
+  resolve(42);
+});
+
+task.then(value => console.log(value));
+console.log('sync end');
+// executor → sync end → 42</code></pre>
+<h2 id="microtask">二、await 后面的代码为什么“稍后执行”</h2><p><code>await expression</code> 会先把表达式转换为 Promise，然后暂停当前 async 函数；恢复执行的部分会被安排为微任务。因此它不会阻塞线程，只会让当前函数让出执行权。</p>
+<pre><code>async function demo() {
+  console.log('A');
+  await 0;
+  console.log('B');
+}
+
+demo();
+console.log('C');
+// A → C → B</code></pre>
+<h2 id="error">三、错误如何沿链路传播</h2><p><code>then</code> 回调抛出的异常会让返回的新 Promise 进入 rejected。<code>catch</code> 本质上是 <code>then(undefined, onRejected)</code>。在 async 函数中抛出异常，等价于返回一个 rejected Promise。</p>
+<pre><code>async function loadUser() {
+  const response = await fetch('/api/user');
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  return response.json();
+}
+
+loadUser()
+  .then(render)
+  .catch(showError)
+  .finally(stopLoading);</code></pre>
+<h2 id="concurrency">四、串行与并发要显式选择</h2><p>连续 <code>await</code> 会串行执行。互不依赖的请求应先创建 Promise，再统一等待；同时要控制并发上限，避免一次性压垮服务端。</p>
+<pre><code>// 串行：总耗时约为两次请求之和
+const user = await getUser();
+const orders = await getOrders();
+
+// 并发：总耗时约为较慢的那一次
+const [user, orders] = await Promise.all([
+  getUser(),
+  getOrders()
+]);</code></pre>
+<h2 id="pitfalls">五、常见误区</h2><ul><li>忘记 return Promise，导致链路提前完成。</li><li>在 <code>forEach</code> 中使用 async，却没有等待所有任务。</li><li>使用 <code>Promise.all</code> 时忽略“任一失败则整体失败”的语义。</li><li>把 await 理解为线程阻塞。</li><li>吞掉异常后不记录上下文，使错误无法定位。</li></ul>
+<blockquote>理解 Promise 的关键不是记 API，而是理解状态只落定一次、回调通过微任务调度、每次 then 都返回一个新 Promise。</blockquote>
+  </article>
+</main>
+<footer class="site-footer"><div class="footer-shell"><span>© <span data-year>2026</span> 程明春 · 把经验整理成可复用的方法。</span><span><a href="https://github.com/chengmingchun" rel="me">GitHub</a> · 静态站点，无追踪脚本</span></div></footer>
+</body>
+</html>
