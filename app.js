@@ -3,7 +3,8 @@ const POSTS=[
   {slug:'cloud-order-state-machine',title:'云资源订单系统：状态机、幂等、重试与补偿如何协作',category:'系统设计',description:'把异步订单从“轮询接口”还原成状态迁移系统，解释重复请求、超时、部分成功和人工介入应该落在哪一层。',outcome:'读完可画出一套可恢复、可追踪的异步订单状态模型。',tags:['状态机','幂等','补偿'],date:'2026-07-10',read_minutes:13},
   {slug:'redis-cache-consistency',title:'缓存一致性不是一道八股题：从读写竞态到工程兜底',category:'数据与性能',description:'从旧值回填、删缓存失败和主从延迟三个竞态出发，分析更新数据库后删缓存、延迟双删与订阅 binlog 的边界。',outcome:'读完能按业务容忍度选择一致性方案，而非背固定答案。',tags:['Redis','一致性','并发'],date:'2026-07-10',read_minutes:12},
   {slug:'agentic-engineering',title:'Agentic 研发系统如何收敛：任务图、证据链与质量门禁',category:'AI 工程化',description:'多 Agent 的核心不是角色数量，而是让任务分解、工具调用、产物验证和失败回退形成可检查的闭环。',outcome:'读完可设计一条不会无限对话、能够验收的 Agent 工作流。',tags:['Agent','MCP','工作流'],date:'2026-07-10',read_minutes:15},
-  {slug:'javascript-async-guide',title:'Promise 与 async/await：从状态机理解异步控制流',category:'基础与算法',description:'把 Promise、微任务、异常传播和并发控制放进同一条执行链理解，并给出常见错误与可运行示例。',outcome:'读完不再把 await 理解成“简单阻塞”，能正确组织并发任务。',tags:['JavaScript','Promise','并发'],date:'2026-07-10',read_minutes:11}
+  {slug:'javascript-async-guide',title:'Promise 与 async/await：从状态机理解异步控制流',category:'基础与算法',description:'把 Promise、微任务、异常传播和并发控制放进同一条执行链理解，并给出常见错误与可运行示例。',outcome:'读完不再把 await 理解成“简单阻塞”，能正确组织并发任务。',tags:['JavaScript','Promise','并发'],date:'2026-07-10',read_minutes:11},
+  {slug:'engineering-review-method',title:'如何写一份真正有用的工程复盘',category:'工程复盘',description:'从事实、机制、防线和行动项四层重构复盘，让文档不再只是事故时间线，而能真正降低重复故障概率。',outcome:'读完可产出一份有负责人、有验收条件、能形成系统改进的复盘。',tags:['故障','可观测性','复盘'],date:'2026-07-10',read_minutes:10}
 ];
 
 const CATEGORY_ORDER=['全部','系统设计','数据与性能','AI 工程化','基础与算法','工程复盘'];
@@ -33,11 +34,7 @@ function create(tag,className,text){
 function renderStats(){
   const categories=new Set(POSTS.map(post=>post.category));
   const minutes=POSTS.reduce((sum,post)=>sum+post.read_minutes,0);
-  const values={
-    'stat-posts':POSTS.length,
-    'stat-categories':categories.size,
-    'stat-hours':Math.max(1,Math.ceil(minutes/60))
-  };
+  const values={'stat-posts':POSTS.length,'stat-categories':categories.size,'stat-hours':Math.max(1,Math.ceil(minutes/60))};
   Object.entries(values).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.textContent=String(value)});
 }
 
@@ -79,7 +76,6 @@ function buildPostCard(post){
   const card=create('a','post-card');
   card.href=`/post/${post.slug}/`;
   card.setAttribute('aria-label',`阅读：${post.title}`);
-
   const top=create('div','card-top');
   top.append(create('span','category-badge',post.category),create('span','read-time',`${post.read_minutes} 分钟`));
   const title=create('h3','card-title',post.title);
@@ -149,8 +145,7 @@ function initToc(){
   const toc=document.querySelector('[data-toc]');
   const article=document.querySelector('.article-content');
   if(!toc||!article)return;
-  const headings=[...article.querySelectorAll('h2,h3')];
-  headings.forEach((heading,index)=>{
+  [...article.querySelectorAll('h2,h3')].forEach((heading,index)=>{
     if(!heading.id)heading.id=`section-${index+1}`;
     const link=create('a',heading.tagName==='H3'?'toc-sub':'',heading.textContent);
     link.href=`#${heading.id}`;
@@ -171,14 +166,7 @@ function initCodeCopy(){
 }
 
 function init(){
-  initTheme();
-  renderStats();
-  renderCategories();
-  initSearch();
-  renderPosts();
-  initReadingProgress();
-  initToc();
-  initCodeCopy();
+  initTheme();renderStats();renderCategories();initSearch();renderPosts();initReadingProgress();initToc();initCodeCopy();
   const year=document.getElementById('year');
   if(year)year.textContent=String(new Date().getFullYear());
 }
