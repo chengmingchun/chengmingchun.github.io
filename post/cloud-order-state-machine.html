@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#3157d5">
+  <meta name="description" content="将长耗时资源编排设计成可恢复、可观测、可验证的异步业务流程。">
+  <link rel="canonical" href="https://chengmingchun.github.io/post/cloud-order-state-machine.html">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('site-theme')||((matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light')}catch(e){}</script>
+  <script src="/js/site.js" defer></script>
+  <title>云资源订单系统：状态机、幂等、重试与补偿如何协作 · 程明春的工程笔记</title>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header"><nav class="nav-shell" aria-label="主导航"><a class="brand" href="/"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a><button class="icon-button menu-button" type="button" data-menu-toggle aria-expanded="false" aria-label="展开导航">☰</button><div class="nav-links" data-nav><a href="/">首页</a><a href="/post/">文章</a><a href="/categories/">专题</a><a href="/about/">关于</a><button class="icon-button" type="button" data-theme-toggle aria-label="切换主题">☾</button></div></nav></header>
+<div class="reading-progress" data-reading-progress></div>
+<main id="main" class="article-shell">
+  <header class="article-header"><p class="eyebrow">系统设计</p><h1>云资源订单系统：状态机、幂等、重试与补偿如何协作</h1><p class="article-summary">将长耗时资源编排设计成可恢复、可观测、可验证的异步业务流程。</p><div class="article-meta"><span>更新于 2026-07-10</span><span>约 14 分钟</span><span>程明春</span></div></header>
+  <nav class="toc" aria-label="文章目录"><strong>本文目录</strong><ol><li><a href="#problem">为什么不能同步等待</a></li><li><a href="#state">状态机设计</a></li><li><a href="#idempotency">幂等边界</a></li><li><a href="#retry">重试与补偿</a></li><li><a href="#observe">可观测与验收</a></li></ol></nav>
+  <article class="article-body">
+<p>创建虚拟机、网络、磁盘或安全组，本质上不是一次数据库 CRUD，而是一条跨系统、长耗时、部分可失败的工作流。把它包装成一个同步 HTTP 请求，最终会遇到超时、重复提交、状态不一致和无法恢复。</p>
+<h2 id="problem">一、为什么订单接口不能一直等底层资源完成</h2>
+<p>底层云平台调用可能需要几十秒甚至数分钟，还可能经历排队、配额校验、网络重试和异步任务。上层请求若同步阻塞，会占用线程与连接；网关超时后，客户端不知道请求到底失败还是仍在执行，重试又可能创建重复资源。</p>
+<pre><code>client → create order → persist intent → return orderId
+                         ↓
+                    async worker
+                         ↓
+              validate → allocate → configure → verify</code></pre>
+<p>因此接口只承诺“已受理”，资源是否最终成功由订单状态机表达。订单不是一行状态字段，而是业务意图、执行进度、失败证据和恢复入口的集合。</p>
+<h2 id="state">二、状态机设计：状态要能回答下一步该做什么</h2>
+<p>一个实用状态集可以是：<code>PENDING</code>、<code>VALIDATING</code>、<code>PROVISIONING</code>、<code>VERIFYING</code>、<code>SUCCEEDED</code>、<code>RETRYING</code>、<code>COMPENSATING</code>、<code>FAILED</code>、<code>CANCELLED</code>。状态数量不是越多越好，关键是每个状态都有明确进入条件、允许事件和退出动作。</p>
+<div class="table-wrap"><table><thead><tr><th>当前状态</th><th>事件</th><th>下一状态</th><th>副作用</th></tr></thead><tbody><tr><td>PENDING</td><td>START</td><td>VALIDATING</td><td>校验租户、配额与参数</td></tr><tr><td>VALIDATING</td><td>PASS</td><td>PROVISIONING</td><td>调用底层资源 API</td></tr><tr><td>PROVISIONING</td><td>ACCEPTED</td><td>VERIFYING</td><td>记录外部任务 ID</td></tr><tr><td>VERIFYING</td><td>READY</td><td>SUCCEEDED</td><td>绑定资源与订单</td></tr><tr><td>任意执行态</td><td>RETRYABLE_ERROR</td><td>RETRYING</td><td>计算退避时间</td></tr><tr><td>任意执行态</td><td>FATAL_ERROR</td><td>COMPENSATING / FAILED</td><td>释放已创建资源</td></tr></tbody></table></div>
+<h2 id="idempotency">三、幂等不是“加一个唯一索引”就结束</h2>
+<p>幂等要覆盖三个层次：</p><ol><li><strong>入口幂等：</strong>客户端携带业务请求号，同一租户内唯一，重复提交返回原订单。</li><li><strong>步骤幂等：</strong>每个执行步骤有 step key 和版本，已成功步骤不会重复执行。</li><li><strong>外部调用幂等：</strong>把订单号或资源意图 ID 传给底层；若底层不支持，则调用前后都要查询已有资源。</li></ol>
+<pre><code>UPDATE order_task
+SET state = 'PROVISIONING', version = version + 1
+WHERE id = ? AND state = 'VALIDATING' AND version = ?;</code></pre>
+<p>受影响行数为 0，说明状态已被其他工作线程推进或版本已变化，当前执行者应停止，而不是继续调用外部系统。这是乐观锁保护状态转换。</p>
+<h2 id="retry">四、重试与补偿：先判断错误语义，再决定动作</h2>
+<p>超时不等于失败。外部请求超时时，资源可能已经创建成功。正确动作通常是先按幂等键或外部任务 ID 查询，再决定重试。错误可以分为：瞬时错误、限流、业务拒绝、未知结果和不可恢复错误。</p>
+<ul><li>瞬时错误：指数退避 + 抖动，设置最大次数。</li><li>限流：尊重 Retry-After，避免重试风暴。</li><li>业务拒绝：直接失败，保留可读错误原因。</li><li>未知结果：先查询外部状态，禁止盲目重放。</li><li>部分成功：进入补偿流程，按逆序释放资源。</li></ul>
+<p>补偿不是数据库事务回滚。它是新的业务动作，本身也可能失败，因此同样需要状态、幂等、重试和人工接管入口。</p>
+<h2 id="observe">五、可观测与验收：让失败可以被解释</h2>
+<p>每次状态转换应记录订单 ID、旧状态、新状态、事件、执行器、外部任务 ID、耗时和错误分类。链路追踪把入口请求、异步消息和底层 API 串起来；指标至少覆盖成功率、各状态停留时间、重试次数、补偿成功率和超时积压。</p>
+<div class="callout"><strong>验收标准示例：</strong>重复请求不会创建重复资源；工作线程崩溃后任务可继续；外部超时不会直接判失败；补偿失败可被发现并人工恢复；任何订单都能回答“现在在哪一步、为什么、下一步是什么”。</div>
+<blockquote>可靠的订单系统不是“永不失败”，而是失败后状态不丢、动作不重、原因可查、流程可继续。</blockquote>
+  </article>
+</main>
+<footer class="site-footer"><div class="footer-shell"><span>© <span data-year>2026</span> 程明春 · 把经验整理成可复用的方法。</span><span><a href="https://github.com/chengmingchun" rel="me">GitHub</a> · 静态站点，无追踪脚本</span></div></footer>
+</body>
+</html>
