@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#3157d5">
+  <meta name="description" content="从角色群聊升级为有状态、有工件、有客观验收和失败恢复的工程系统。">
+  <link rel="canonical" href="https://chengmingchun.github.io/post/agentic-engineering.html">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('site-theme')||((matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light')}catch(e){}</script>
+  <script src="/js/site.js" defer></script>
+  <title>Agentic 研发系统如何收敛：任务图、证据链与质量门禁 · 程明春的工程笔记</title>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header"><nav class="nav-shell" aria-label="主导航"><a class="brand" href="/"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a><button class="icon-button menu-button" type="button" data-menu-toggle aria-expanded="false" aria-label="展开导航">☰</button><div class="nav-links" data-nav><a href="/">首页</a><a href="/post/">文章</a><a href="/categories/">专题</a><a href="/about/">关于</a><button class="icon-button" type="button" data-theme-toggle aria-label="切换主题">☾</button></div></nav></header>
+<div class="reading-progress" data-reading-progress></div>
+<main id="main" class="article-shell">
+  <header class="article-header"><p class="eyebrow">AI 工程化</p><h1>Agentic 研发系统如何收敛：任务图、证据链与质量门禁</h1><p class="article-summary">从角色群聊升级为有状态、有工件、有客观验收和失败恢复的工程系统。</p><div class="article-meta"><span>更新于 2026-07-10</span><span>约 13 分钟</span><span>程明春</span></div></header>
+  <nav class="toc" aria-label="文章目录"><strong>本文目录</strong><ol><li><a href="#misunderstanding">常见误区</a></li><li><a href="#architecture">收敛架构</a></li><li><a href="#state">共享状态与证据</a></li><li><a href="#quality">质量门禁</a></li><li><a href="#recovery">失败恢复</a></li></ol></nav>
+  <article class="article-body">
+<p>多 Agent 系统最容易出现的假繁荣是：角色很多、对话很长、Demo 很热闹，但结果不可复现、任务不收敛、失败后只能重来。工程目标不是“让多个模型聊天”，而是稳定地产出经过验证的工件。</p>
+<h2 id="misunderstanding">一、三个常见误区</h2>
+<ol><li><strong>把角色提示词当架构：</strong>“产品经理 Agent、架构师 Agent、开发 Agent”只是名称，没有输入输出契约。</li><li><strong>让所有 Agent 共享完整对话：</strong>上下文越来越长，冲突信息和无关历史持续污染决策。</li><li><strong>只让模型判断完成：</strong>模型说“代码已完成”不能替代编译、测试、静态检查和验收用例。</li></ol>
+<h2 id="architecture">二、用任务图而不是群聊组织协作</h2>
+<p>把目标拆成有依赖关系的任务图：需求澄清 → 方案设计 → 代码变更 → 测试 → Review → 发布说明。每个节点定义负责人、输入工件、输出 schema、工具权限、完成条件和失败策略。</p>
+<pre><code>TaskNode {
+  id
+  objective
+  dependencies[]
+  input_artifacts[]
+  output_schema
+  allowed_tools[]
+  acceptance_checks[]
+  retry_policy
+}</code></pre>
+<p>协调器只负责状态推进和路由，不应该亲自完成所有推理。专业 Agent 读取最小必要上下文，产出结构化结果；验证器根据客观证据决定是否进入下一节点。</p>
+<h2 id="state">三、共享的是状态与证据，不是无限对话</h2>
+<p>推荐把上下文分成四层：</p><ul><li><strong>目标层：</strong>用户目标、范围和不可违反的约束。</li><li><strong>计划层：</strong>任务图、依赖、当前状态和风险。</li><li><strong>工件层：</strong>需求文档、设计、代码 diff、测试报告。</li><li><strong>记忆层：</strong>长期稳定的项目约定和历史决策。</li></ul>
+<p>每个结论都应尽量附带证据引用，例如文件路径、代码行、测试输出或文档段落。这样 Reviewer 可以验证，而不是相信另一个模型的自然语言总结。</p>
+<h2 id="quality">四、质量门禁：把“完成”改成“通过检查”</h2>
+<div class="table-wrap"><table><thead><tr><th>阶段</th><th>机器门禁</th><th>模型门禁</th></tr></thead><tbody><tr><td>需求</td><td>字段完整、约束无冲突</td><td>场景与边界是否覆盖</td></tr><tr><td>设计</td><td>接口 schema、依赖检查</td><td>取舍是否合理</td></tr><tr><td>编码</td><td>编译、Lint、类型检查</td><td>可维护性与风险 Review</td></tr><tr><td>测试</td><td>单测、集成测试、覆盖率</td><td>是否遗漏关键场景</td></tr><tr><td>发布</td><td>变更清单、回滚脚本</td><td>说明是否清晰</td></tr></tbody></table></div>
+<p>模型擅长发现语义风险，工具擅长给出确定结果。两者需要组合：先运行工具，再把结构化输出交给 Reviewer，而不是让 Reviewer 猜代码能否运行。</p>
+<h2 id="recovery">五、失败恢复：让系统从检查点继续</h2>
+<p>每个任务节点完成后保存输入、输出、工具调用摘要和检查结果。失败时根据类型处理：工具暂时失败可重试；输出不满足 schema 让原 Agent 修复；方案冲突回退到上游节点；预算耗尽或连续失败进入人工接管。</p>
+<pre><code>if tool_error.retryable:
+    retry_with_backoff()
+elif validation_failed:
+    send_feedback_to_owner_agent()
+elif upstream_assumption_invalid:
+    reopen_dependency_node()
+else:
+    escalate_with_evidence_bundle()</code></pre>
+<p>为了防止循环，需要设置节点最大尝试次数、全局 token/时间预算、重复结论检测和终止条件。真正的“收敛”来自有限状态和明确验收，而不是提示词里写一句“请务必完成”。</p>
+<div class="callout"><strong>最小可行实现：</strong>先从单协调器 + 3 个角色开始：Planner 生成任务图，Worker 执行工具，Reviewer 基于测试证据验收。等状态、工件和门禁稳定后，再扩展专业 Agent。</div>
+<blockquote>多 Agent 的价值不是模拟一个组织，而是把复杂工作拆成可追踪、可验证、可恢复的流水线。</blockquote>
+  </article>
+</main>
+<footer class="site-footer"><div class="footer-shell"><span>© <span data-year>2026</span> 程明春 · 把经验整理成可复用的方法。</span><span><a href="https://github.com/chengmingchun" rel="me">GitHub</a> · 静态站点，无追踪脚本</span></div></footer>
+</body>
+</html>
