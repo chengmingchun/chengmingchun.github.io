@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#3157d5">
+  <meta name="description" content="不靠碰运气加索引，系统定位回表、排序、关联放大、深分页与优化器误判。">
+  <link rel="canonical" href="https://chengmingchun.github.io/post/sql-performance-playbook.html">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('site-theme')||((matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light')}catch(e){}</script>
+  <script src="/js/site.js" defer></script>
+  <title>从 49 秒到 0.9 秒：复杂 SQL 性能排查方法论 · 程明春的工程笔记</title>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header"><nav class="nav-shell" aria-label="主导航"><a class="brand" href="/"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a><button class="icon-button menu-button" type="button" data-menu-toggle aria-expanded="false" aria-label="展开导航">☰</button><div class="nav-links" data-nav><a href="/">首页</a><a href="/post/">文章</a><a href="/categories/">专题</a><a href="/about/">关于</a><button class="icon-button" type="button" data-theme-toggle aria-label="切换主题">☾</button></div></nav></header>
+<div class="reading-progress" data-reading-progress></div>
+<main id="main" class="article-shell">
+  <header class="article-header"><p class="eyebrow">数据库与性能</p><h1>从 49 秒到 0.9 秒：复杂 SQL 性能排查方法论</h1><p class="article-summary">不靠碰运气加索引，系统定位回表、排序、关联放大、深分页与优化器误判。</p><div class="article-meta"><span>更新于 2026-07-10</span><span>约 12 分钟</span><span>程明春</span></div></header>
+  <nav class="toc" aria-label="文章目录"><strong>本文目录</strong><ol><li><a href="#symptom">先定义现象</a></li><li><a href="#plan">读执行计划</a></li><li><a href="#bottleneck">定位四类成本</a></li><li><a href="#rewrite">重写与验证</a></li><li><a href="#checklist">复用清单</a></li></ol></nav>
+  <article class="article-body">
+<p>“SQL 很慢，加个索引”是最常见、也最危险的性能优化方式。真实问题往往不是缺少某一个索引，而是查询形态、数据分布、排序分页和优化器成本估算共同作用的结果。</p>
+<div class="callout"><strong>案例背景：</strong>一个包含多表关联、子查询、排序和深分页的列表查询，在数据量增长后从秒级恶化到约 49 秒。优化后稳定在约 0.9 秒。以下只保留可复用的技术结构，不包含业务敏感信息。</div>
+<h2 id="symptom">一、先定义现象：慢在哪里，而不是“整个 SQL 很慢”</h2>
+<p>第一步不是改 SQL，而是把请求拆成四段：网关与网络、应用等待、数据库执行、结果集传输。只有数据库执行时间占大头，才进入 SQL 优化。应用日志应记录 SQL 指纹、参数规模、返回行数和连接池等待时间，避免把连接池耗尽误判成数据库慢。</p>
+<pre><code>request latency
+├── gateway / network
+├── connection pool wait
+├── database execution
+└── result mapping / serialization</code></pre>
+<p>随后固定一组具有代表性的参数，在相同数据快照上重复测试。只看一次耗时没有意义，因为缓存预热、并发和参数选择性都会改变结果。</p>
+<h2 id="plan">二、读执行计划：重点不是有没有索引，而是实际做了多少工作</h2>
+<p>执行计划至少关注：驱动表、访问类型、预估行数、实际行数、过滤比例、回表次数、临时表与文件排序。MySQL 8 可以优先使用 <code>EXPLAIN ANALYZE</code>，把“优化器估计”与“真实执行”放在一起看。</p>
+<pre><code>EXPLAIN ANALYZE
+SELECT ...
+FROM order_main o
+LEFT JOIN tenant t ON t.id = o.tenant_id
+WHERE o.status = ?
+ORDER BY o.created_at DESC
+LIMIT 100000, 20;</code></pre>
+<p>最有价值的信号通常是“预估 100 行，实际扫描 100 万行”。这意味着统计信息、字段相关性或索引选择性让优化器做了错误判断。此时单纯新增索引可能不会被选中。</p>
+<h2 id="bottleneck">三、定位四类主要成本</h2>
+<h3>1. 回表：索引命中了，但每一行都要再取整行</h3><p>二级索引保存索引列和主键。查询列不在索引中时，需要通过主键回到聚簇索引。小结果集问题不大，但深分页先扫描十万条再丢弃时，十万次回表会成为主成本。</p>
+<h3>2. 排序：过滤索引和排序索引不能同时高效利用</h3><p>当 <code>WHERE</code> 与 <code>ORDER BY</code> 分别依赖不同索引，优化器需要在“先少扫行再排序”和“按顺序扫描再过滤”之间选择。数据分布变化后，原来正确的选择可能失效。</p>
+<h3>3. 关联放大：一对多表让中间结果爆炸</h3><p>多个 <code>LEFT JOIN</code> 并不只是“多查几张表”。如果一个主表行在两张明细表各匹配 5 行，中间结果可能放大到 25 行，再进行排序和去重。应先确认关联基数，再判断是否可以先聚合、后关联。</p>
+<h3>4. 深分页：OFFSET 的成本不会因为只返回 20 行而消失</h3><p><code>LIMIT 100000, 20</code> 仍需找到并丢弃前 100000 行。可使用游标分页；若产品必须支持跳页，可先在覆盖索引中取主键，再回表关联详情。</p>
+<pre><code>SELECT detail.*
+FROM order_main detail
+JOIN (
+  SELECT id
+  FROM order_main
+  WHERE status = ?
+  ORDER BY created_at DESC, id DESC
+  LIMIT 100000, 20
+) page ON page.id = detail.id
+ORDER BY detail.created_at DESC, detail.id DESC;</code></pre>
+<h2 id="rewrite">四、重写方案：让昂贵操作发生在更小的数据集上</h2>
+<p>案例最终采用的核心原则是：先利用窄索引完成过滤、排序和分页，只保留主键；再把 20 个主键关联回主表与维表。这样排序和 OFFSET 都在更小的索引页上完成，昂贵的回表与多表关联只执行几十次。</p>
+<div class="table-wrap"><table><thead><tr><th>动作</th><th>优化前</th><th>优化后</th></tr></thead><tbody><tr><td>扫描</td><td>宽行 + 多表中间结果</td><td>窄覆盖索引</td></tr><tr><td>回表</td><td>大量候选行逐行回表</td><td>只对分页后的主键回表</td></tr><tr><td>排序</td><td>可能产生临时表与文件排序</td><td>复合索引提供稳定顺序</td></tr><tr><td>耗时</td><td>约 49 秒</td><td>约 0.9 秒</td></tr></tbody></table></div>
+<p>验证不能只看平均值。至少比较 P50/P95、逻辑读、扫描行数、返回行数、临时表、CPU 和并发下的连接占用；同时测试不同状态值与不同页码，防止只优化了某一组参数。</p>
+<h2 id="checklist">五、可复用的 SQL 排查清单</h2>
+<ol><li>确认慢的是数据库执行，而不是连接池或序列化。</li><li>固定参数和数据快照，保存优化前基线。</li><li>比较预估行数与实际行数，定位优化器误判。</li><li>检查回表、排序、临时表、关联放大和深分页。</li><li>让过滤、排序、分页尽量在窄索引上完成。</li><li>用真实并发和多组参数回归，观察尾延迟。</li><li>记录为什么有效，而不是只记录最终 SQL。</li></ol>
+<blockquote>性能优化的本质不是写出更“炫”的 SQL，而是减少数据库真正需要完成的工作量。</blockquote>
+  </article>
+</main>
+<footer class="site-footer"><div class="footer-shell"><span>© <span data-year>2026</span> 程明春 · 把经验整理成可复用的方法。</span><span><a href="https://github.com/chengmingchun" rel="me">GitHub</a> · 静态站点，无追踪脚本</span></div></footer>
+</body>
+</html>
