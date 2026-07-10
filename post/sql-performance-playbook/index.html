@@ -1,0 +1,15 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="从 49 秒到 0.9 秒的复杂 SQL 性能排查方法论。"><link rel="stylesheet" href="/style.css"><script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||((matchMedia('(prefers-color-scheme:light)').matches)?'light':'dark')}catch(e){}</script><script src="/app.js" defer></script><title>从 49 秒到 0.9 秒：复杂 SQL 性能排查方法论</title></head><body><div class="reading-progress" data-reading-progress></div><header class="site-header"><nav class="nav-shell"><a class="brand" href="/"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a><div class="nav-links"><a href="/#posts">文章</a><a href="/categories/">专题</a><button class="icon-btn" id="themeBtn" type="button">◐</button></div></nav></header><main class="article-layout"><article><header class="article-header"><p class="eyebrow">数据与性能</p><h1>从 49 秒到 0.9 秒：复杂 SQL 性能排查方法论</h1><p class="article-lead">真正有效的 SQL 优化不是背“索引失效场景”，而是把响应时间拆成可验证的执行成本，再找到成本最高的那一步。</p><div class="article-meta"><span>2026-07-10</span><span>14 分钟</span><span>MySQL · 索引 · 执行计划</span></div></header><div class="article-content"><h2>一、先把问题描述成工程事实</h2><p>一次复杂查询在数据量增长后从秒级退化到约 49 秒。SQL 中包含多张表连接、子查询、排序和分页。第一反应如果只是“再加一个索引”，很容易让优化变成试错。</p><div class="callout">排查前先固定四个变量：SQL 文本、参数、数据量级、数据库版本。否则每次执行面对的都可能不是同一个问题。</div><p>需要记录的不只是总耗时，还包括扫描行数、返回行数、临时表、排序、回表次数、锁等待和磁盘读取。总耗时只是结果，执行算子才是原因。</p><h2>二、用执行计划建立成本地图</h2><p><code>EXPLAIN</code> 不是为了看有没有出现 <code>ALL</code>，而是为了回答三件事：</p><ol><li>优化器选择了怎样的连接顺序？</li><li>每一步预计读取多少行，实际又读取多少行？</li><li>过滤、排序和回表发生在数据缩小之前还是之后？</li></ol><pre><code>EXPLAIN ANALYZE
+SELECT o.id, o.created_at, u.name
+FROM orders o
+JOIN users u ON u.id = o.user_id
+WHERE o.tenant_id = ?
+ORDER BY o.created_at DESC
+LIMIT 100000, 20;</code></pre><p>重点看“行数放大”。假设前一层返回 10 万行，下一层对每行再回表一次，那么即使单次回表很快，总成本也会被乘法放大。</p><h2>三、最常见的三个高成本区域</h2><h3>1. 覆盖不足导致大量回表</h3><p>索引命中了过滤条件，不等于查询已经高效。如果查询还需要索引之外的列，数据库可能对大量候选行回主键索引取完整记录。优化方向不是盲目把所有列塞进索引，而是让高选择性的过滤和必要返回列尽量形成覆盖。</p><h3>2. 排序发生在过滤之前</h3><p>当 <code>WHERE</code> 与 <code>ORDER BY</code> 分别命中不同索引时，优化器需要在“少扫描”和“免排序”之间选择。错误估算可能导致它选择看似便宜、实际代价很高的路径。此时应先修正统计信息、调整联合索引顺序，再考虑 hint。</p><h3>3. 深分页重复丢弃数据</h3><p><code>LIMIT 100000,20</code> 仍然要读取并丢弃前 10 万行。可以先在窄索引上定位主键，再回表取详情：</p><pre><code>SELECT o.*
+FROM orders o
+JOIN (
+  SELECT id
+  FROM orders
+  WHERE tenant_id = ?
+  ORDER BY created_at DESC
+  LIMIT 100000, 20
+) page ON page.id = o.id;</code></pre><p>更稳定的方式是游标分页：记录上一页最后一条的排序键，下一页使用范围条件继续查。</p><h2>四、从 49 秒到 0.9 秒的推导顺序</h2><ol><li>确认慢点位于数据库，而不是网络、连接池或应用序列化。</li><li>使用实际执行计划找到行数放大的子查询和回表路径。</li><li>把过滤条件与排序键重新组织进联合索引。</li><li>让深分页先在窄索引完成，再按主键获取完整字段。</li><li>对比改造前后的扫描行数、临时表、排序和稳定性。</li></ol><p>最终耗时下降只是结果。真正可迁移的经验是：先减少参与后续算子的行数，再减少每一行的访问成本。</p><h2>五、优化完成后的验收清单</h2><ul><li>相同参数重复执行，P95 和 P99 是否稳定，而不只是某一次很快？</li><li>扫描行数与返回行数的比例是否显著下降？</li><li>新索引是否增加了不可接受的写放大和存储成本？</li><li>不同租户、不同时间范围下，执行计划是否仍然合理？</li><li>是否建立了慢查询阈值和回归测试，防止数据增长后再次退化？</li></ul><hr><p>SQL 优化的本质，是让数据尽早变少、让访问路径尽量连续、让每一步成本都可被观察和验证。</p></div></article><aside class="article-aside"><nav class="toc"><strong>文章目录</strong><div data-toc></div></nav></aside></main></body></html>
