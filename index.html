@@ -1,77 +1,81 @@
-<!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
-
+<!doctype html>
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Spring's Blog</title>
-  <meta name="description" content="记录 Rust、算法、技术工程的思考与实践" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet" />
-  <link rel="stylesheet" href="/style.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="description" content="程明春的工程笔记：系统设计、数据性能、AI 工程化、基础算法与工程复盘。">
+  <link rel="canonical" href="https://chengmingchun.github.io/">
+  <link rel="stylesheet" href="/style.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||((matchMedia('(prefers-color-scheme:light)').matches)?'light':'dark')}catch(e){}</script>
+  <script src="/app.js" defer></script>
+  <title>程明春的工程笔记</title>
 </head>
-
 <body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <nav class="nav-shell" aria-label="主导航">
+      <a class="brand" href="/" aria-label="返回首页"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a>
+      <div class="nav-links">
+        <a href="#posts">文章</a><a href="/categories/">专题</a><a href="#method">写作方法</a>
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="切换主题">◐</button>
+      </div>
+    </nav>
+  </header>
 
-  <!-- ═══ Hero ═══ -->
-  <section class="hero">
-    <div class="hero-tag">Spring's Blog</div>
-    <h1>
-      <span class="grad" id="typing-text"></span>
-    </h1>
-    <p class="hero-sub">
-      记录 Rust · 算法 · 技术 · 系统设计的思考与实践。<br />
-      每篇文章都是一次认知迭代。
-    </p>
-    <div class="hero-stats">
-      <div class="stat">
-        <div class="stat-num" id="stat-posts">—</div>
-        <div class="stat-label">篇文章</div>
+  <main id="main">
+    <section class="hero page-shell">
+      <div class="hero-copy">
+        <p class="eyebrow">ENGINEERING NOTES · 持续更新</p>
+        <h1>把零散经验，整理成<br><span class="gradient-text">可以复用的工程方法。</span></h1>
+        <p class="hero-sub">不只记录“怎么做”，更回答为什么这样设计、方案在哪些边界失效，以及如何验证它真的有效。</p>
+        <div class="hero-actions"><a class="button primary" href="#posts">开始阅读</a><a class="button ghost" href="/categories/">查看知识地图</a></div>
       </div>
-      <div class="stat">
-        <div class="stat-num" id="stat-categories">—</div>
-        <div class="stat-label">个分类</div>
-      </div>
-      <div class="stat">
-        <div class="stat-num" id="stat-hours">—</div>
-        <div class="stat-label">小时阅读量</div>
-      </div>
-    </div>
-  </section>
+      <aside class="hero-panel" aria-label="博客方向">
+        <div class="signal"><span class="signal-dot"></span>内容导向，而不是动画导向</div>
+        <dl class="hero-metrics">
+          <div><dt id="stat-posts">5</dt><dd>篇深度文章</dd></div>
+          <div><dt id="stat-categories">5</dt><dd>个专题方向</dd></div>
+          <div><dt id="stat-hours">1</dt><dd>小时系统阅读</dd></div>
+        </dl>
+        <p>当前主线：系统设计、数据库与缓存、Agentic 研发、Java/Rust/算法基础。</p>
+      </aside>
+    </section>
 
-  <!-- ═══ Toolbar ═══ -->
-  <div class="toolbar" id="toolbar">
-    <div class="search-wrap">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="8" />
-        <path d="m21 21-4.35-4.35" />
-      </svg>
-      <input id="searchInput" type="search" placeholder="搜索文章标题、标签…" autocomplete="off" />
-    </div>
-    <div class="categories" id="catChips"></div>
-    <button class="theme-btn" id="themeBtn" title="切换主题">🌙</button>
-  </div>
-
-  <!-- ═══ Main ═══ -->
-  <main class="main" id="mainSection">
-    <div class="main-inner">
-      <div class="section-head">
-        <h2 class="section-title">全部文章</h2>
-        <span class="result-count" id="resultCount"></span>
+    <section class="topic-strip page-shell" aria-labelledby="topics-title">
+      <div class="section-heading"><div><p class="eyebrow">KNOWLEDGE MAP</p><h2 id="topics-title">按问题域组织，而不是按技术名词堆放</h2></div><a href="/categories/">完整专题 →</a></div>
+      <div class="topic-grid">
+        <a class="topic-card" href="#posts" data-category-link="系统设计"><span>01</span><h3>系统设计</h3><p>状态机、幂等、异步任务、重试补偿与可观测性。</p></a>
+        <a class="topic-card" href="#posts" data-category-link="数据与性能"><span>02</span><h3>数据与性能</h3><p>SQL、索引、Redis、一致性、主从延迟与排障方法。</p></a>
+        <a class="topic-card" href="#posts" data-category-link="AI 工程化"><span>03</span><h3>AI 工程化</h3><p>Agent、RAG、MCP、任务图、证据链与质量门禁。</p></a>
+        <a class="topic-card" href="#posts" data-category-link="基础与算法"><span>04</span><h3>基础与算法</h3><p>并发、JVM、Rust、数据结构与算法思维。</p></a>
+        <a class="topic-card" href="#posts" data-category-link="工程复盘"><span>05</span><h3>工程复盘</h3><p>从故障现场提炼可迁移的判断框架与检查清单。</p></a>
       </div>
-      <div class="posts-grid" id="postsGrid">
-        <!-- Cards injected by app.js -->
-        <div class="empty-state" id="loadingState">
-          <h3>加载中…</h3>
+    </section>
+
+    <section class="posts-section" id="posts">
+      <div class="page-shell">
+        <div class="section-heading"><div><p class="eyebrow">ARTICLES</p><h2>深度文章</h2></div><span class="result-count" id="resultCount">5 篇</span></div>
+        <div class="toolbar" aria-label="文章筛选">
+          <label class="search-wrap"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="搜索标题、摘要或标签" autocomplete="off"></label>
+          <div class="categories" id="catChips" aria-label="文章分类"></div>
         </div>
+        <div class="posts-grid" id="postsGrid"></div>
+        <noscript><p class="empty-state">请启用 JavaScript 以使用文章筛选。文章仍可从专题页访问。</p></noscript>
       </div>
-    </div>
+    </section>
+
+    <section class="method page-shell" id="method">
+      <div class="section-heading"><div><p class="eyebrow">WRITING STANDARD</p><h2>一篇文章至少解决四件事</h2></div></div>
+      <div class="method-grid">
+        <article><strong>01</strong><h3>还原问题</h3><p>明确现象、约束、数据规模和错误假设，避免只给结论。</p></article>
+        <article><strong>02</strong><h3>解释机制</h3><p>用状态流、时序或执行计划说明系统为什么会这样运行。</p></article>
+        <article><strong>03</strong><h3>比较方案</h3><p>说明收益、成本、适用边界，以及为什么不选其他方案。</p></article>
+        <article><strong>04</strong><h3>给出验证</h3><p>用指标、日志、测试或检查清单证明改动确实生效。</p></article>
+      </div>
+    </section>
   </main>
 
-  <script src="/app.js"></script>
+  <footer class="site-footer"><div class="page-shell"><p>© <span id="year"></span> 程明春 · 把实践沉淀成可复用的方法</p><a href="https://github.com/chengmingchun">GitHub</a></div></footer>
 </body>
-
 </html>

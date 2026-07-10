@@ -1,197 +1,174 @@
-const CAT_COLORS = {
-  'Rust':     '#f97316',
-  '算法':     '#22c55e',
-  '其他语言': '#06b6d4',
-  'AI':       '#8b5cf6',
-  '杂记':     '#ec4899',
-  'default':  '#6366f1',
-};
-
-function catColor(name) {
-  return CAT_COLORS[name] || CAT_COLORS['default'];
-}
-
-// ─── Typing animation ─────────────────────────────────────────────────────
-const PHRASES = [
-  '写代码，写思想',
-  'Build in Rust 🦀',
-  '每次学习都是迭代',
-  'Think. Code. Iterate.',
+const POSTS=[
+  {slug:'sql-performance-playbook',title:'从 49 秒到 0.9 秒：复杂 SQL 性能排查方法论',category:'数据与性能',description:'从慢查询现象出发，沿执行计划、扫描行数、回表、排序与分页逐层收敛问题，而不是靠“加索引”碰运气。',outcome:'读完可建立一套从现象到验证的 SQL 排障流程。',tags:['MySQL','索引','执行计划'],date:'2026-07-10',read_minutes:14},
+  {slug:'cloud-order-state-machine',title:'云资源订单系统：状态机、幂等、重试与补偿如何协作',category:'系统设计',description:'把异步订单从“轮询接口”还原成状态迁移系统，解释重复请求、超时、部分成功和人工介入应该落在哪一层。',outcome:'读完可画出一套可恢复、可追踪的异步订单状态模型。',tags:['状态机','幂等','补偿'],date:'2026-07-10',read_minutes:13},
+  {slug:'redis-cache-consistency',title:'缓存一致性不是一道八股题：从读写竞态到工程兜底',category:'数据与性能',description:'从旧值回填、删缓存失败和主从延迟三个竞态出发，分析更新数据库后删缓存、延迟双删与订阅 binlog 的边界。',outcome:'读完能按业务容忍度选择一致性方案，而非背固定答案。',tags:['Redis','一致性','并发'],date:'2026-07-10',read_minutes:12},
+  {slug:'agentic-engineering',title:'Agentic 研发系统如何收敛：任务图、证据链与质量门禁',category:'AI 工程化',description:'多 Agent 的核心不是角色数量，而是让任务分解、工具调用、产物验证和失败回退形成可检查的闭环。',outcome:'读完可设计一条不会无限对话、能够验收的 Agent 工作流。',tags:['Agent','MCP','工作流'],date:'2026-07-10',read_minutes:15},
+  {slug:'javascript-async-guide',title:'Promise 与 async/await：从状态机理解异步控制流',category:'基础与算法',description:'把 Promise、微任务、异常传播和并发控制放进同一条执行链理解，并给出常见错误与可运行示例。',outcome:'读完不再把 await 理解成“简单阻塞”，能正确组织并发任务。',tags:['JavaScript','Promise','并发'],date:'2026-07-10',read_minutes:11},
+  {slug:'engineering-review-method',title:'如何写一份真正有用的工程复盘',category:'工程复盘',description:'从事实、机制、防线和行动项四层重构复盘，让文档不再只是事故时间线，而能真正降低重复故障概率。',outcome:'读完可产出一份有负责人、有验收条件、能形成系统改进的复盘。',tags:['故障','可观测性','复盘'],date:'2026-07-10',read_minutes:10}
 ];
-let phraseIdx = 0, charIdx = 0, deleting = false;
-const typingEl = document.getElementById('typing-text');
 
-function tick() {
-  const phrase = PHRASES[phraseIdx];
-  if (!deleting) {
-    typingEl.textContent = phrase.slice(0, ++charIdx);
-    if (charIdx === phrase.length) { deleting = true; setTimeout(tick, 1800); return; }
-  } else {
-    typingEl.textContent = phrase.slice(0, --charIdx);
-    if (charIdx === 0) { deleting = false; phraseIdx = (phraseIdx + 1) % PHRASES.length; }
-  }
-  setTimeout(tick, deleting ? 40 : 80);
-}
-tick();
+const CATEGORY_ORDER=['全部','系统设计','数据与性能','AI 工程化','基础与算法','工程复盘'];
+let activeCategory='全部';
+let searchQuery='';
 
-// ─── Theme ────────────────────────────────────────────────────────────────
-const html = document.documentElement;
-const themeBtn = document.getElementById('themeBtn');
-let theme = localStorage.getItem('theme') || 'dark';
-
-function applyTheme(t) {
-  html.dataset.theme = t;
-  themeBtn.textContent = t === 'dark' ? '🌙' : '☀️';
-  localStorage.setItem('theme', t);
-}
-applyTheme(theme);
-themeBtn.addEventListener('click', () => {
-  theme = theme === 'dark' ? 'light' : 'dark';
-  applyTheme(theme);
-});
-
-// ─── State ────────────────────────────────────────────────────────────────
-let allPosts = [];
-let activeCategory = 'all';
-let searchQuery = '';
-
-// ─── Scroll Observer ──────────────────────────────────────────────────────
-const observerOptions = {
-  root: null,
-  rootMargin: '40px',
-  threshold: 0.05
-};
-
-const observer = new IntersectionObserver((entries, obs) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('show');
-      // Remove transition delay after animation completes to not affect hover
-      setTimeout(() => {
-        entry.target.style.transitionDelay = '0s';
-      }, 600);
-      obs.unobserve(entry.target);
-    }
-  });
-}, observerOptions);
-
-// ─── Fetch posts ──────────────────────────────────────────────────────────
-async function loadPosts() {
-  try {
-    const res = await fetch('/api/posts');
-    const data = await res.json();
-    allPosts = data.posts || [];
-    updateStats();
-    renderCategoryChips();
-    renderCards();
-  } catch (e) {
-    document.getElementById('loadingState').innerHTML =
-      '<h3>无法加载文章</h3><p>请确认后端服务正在运行（http://localhost:3000）</p>';
-  }
-}
-
-// ─── Stats ────────────────────────────────────────────────────────────────
-function updateStats() {
-  const cats = new Set(allPosts.map(p => p.category)).size;
-  const hours = Math.ceil(allPosts.reduce((s, p) => s + p.read_minutes, 0) / 60);
-  animateNum('stat-posts', allPosts.length);
-  animateNum('stat-categories', cats);
-  animateNum('stat-hours', hours);
-}
-
-function animateNum(id, target) {
-  const el = document.getElementById(id);
-  let cur = 0;
-  const step = Math.ceil(target / 30);
-  const timer = setInterval(() => {
-    cur = Math.min(cur + step, target);
-    el.textContent = cur;
-    if (cur >= target) clearInterval(timer);
-  }, 30);
-}
-
-// ─── Category chips ───────────────────────────────────────────────────────
-function renderCategoryChips() {
-  const cats = ['all', ...new Set(allPosts.map(p => p.category))];
-  const container = document.getElementById('catChips');
-  container.innerHTML = '';
-  cats.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'cat-chip' + (cat === activeCategory ? ' active' : '');
-    btn.textContent = cat === 'all' ? '全部' : cat;
-    btn.dataset.cat = cat;
-    btn.addEventListener('click', () => {
-      activeCategory = cat;
-      document.querySelectorAll('.cat-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
-      renderCards();
-    });
-    container.appendChild(btn);
+function initTheme(){
+  const root=document.documentElement;
+  const button=document.getElementById('themeBtn');
+  const current=root.dataset.theme||'dark';
+  if(button)button.textContent=current==='dark'?'☾':'☀';
+  button?.addEventListener('click',()=>{
+    const next=root.dataset.theme==='dark'?'light':'dark';
+    root.dataset.theme=next;
+    button.textContent=next==='dark'?'☾':'☀';
+    try{localStorage.setItem('theme',next)}catch(e){}
   });
 }
 
-// ─── Filter ───────────────────────────────────────────────────────────────
-function filteredPosts() {
-  return allPosts.filter(p => {
-    const matchCat = activeCategory === 'all' || p.category === activeCategory;
-    const q = searchQuery.toLowerCase();
-    const matchSearch = !q ||
-      p.title.toLowerCase().includes(q) ||
-      p.description.toLowerCase().includes(q) ||
-      p.tags.some(t => t.toLowerCase().includes(q));
-    return matchCat && matchSearch;
+function create(tag,className,text){
+  const node=document.createElement(tag);
+  if(className)node.className=className;
+  if(text!==undefined)node.textContent=text;
+  return node;
+}
+
+function renderStats(){
+  const categories=new Set(POSTS.map(post=>post.category));
+  const minutes=POSTS.reduce((sum,post)=>sum+post.read_minutes,0);
+  const values={'stat-posts':POSTS.length,'stat-categories':categories.size,'stat-hours':Math.max(1,Math.ceil(minutes/60))};
+  Object.entries(values).forEach(([id,value])=>{const el=document.getElementById(id);if(el)el.textContent=String(value)});
+}
+
+function renderCategories(){
+  const container=document.getElementById('catChips');
+  if(!container)return;
+  const available=new Set(POSTS.map(post=>post.category));
+  container.replaceChildren();
+  CATEGORY_ORDER.filter(cat=>cat==='全部'||available.has(cat)).forEach(category=>{
+    const button=create('button','cat-chip'+(category===activeCategory?' active':''),category);
+    button.type='button';
+    button.dataset.category=category;
+    button.setAttribute('aria-pressed',String(category===activeCategory));
+    button.addEventListener('click',()=>selectCategory(category));
+    container.appendChild(button);
   });
 }
 
-// ─── Render cards ─────────────────────────────────────────────────────────
-function renderCards() {
-  const grid = document.getElementById('postsGrid');
-  const posts = filteredPosts();
+function selectCategory(category){
+  activeCategory=category;
+  document.querySelectorAll('.cat-chip').forEach(button=>{
+    const active=button.dataset.category===category;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-pressed',String(active));
+  });
+  renderPosts();
+}
 
-  document.getElementById('resultCount').textContent =
-    posts.length ? `${posts.length} 篇` : '';
+function getFilteredPosts(){
+  const q=searchQuery.trim().toLocaleLowerCase('zh-CN');
+  return POSTS.filter(post=>{
+    const categoryMatch=activeCategory==='全部'||post.category===activeCategory;
+    const haystack=[post.title,post.description,post.outcome,post.category,...post.tags].join(' ').toLocaleLowerCase('zh-CN');
+    return categoryMatch&&(!q||haystack.includes(q));
+  });
+}
 
-  if (!posts.length) {
-    grid.innerHTML = '<div class="empty-state"><h3>没有找到匹配的文章</h3><p>换个关键词试试？</p></div>';
+function buildPostCard(post){
+  const card=create('a','post-card');
+  card.href=`/post/${post.slug}/`;
+  card.setAttribute('aria-label',`阅读：${post.title}`);
+  const top=create('div','card-top');
+  top.append(create('span','category-badge',post.category),create('span','read-time',`${post.read_minutes} 分钟`));
+  const title=create('h3','card-title',post.title);
+  const desc=create('p','card-desc',post.description);
+  const outcome=create('p','card-outcome',post.outcome);
+  const footer=create('div','card-footer');
+  footer.append(create('time','card-date',post.date));
+  const tags=create('div','card-tags');
+  post.tags.forEach(tag=>tags.appendChild(create('span','tag',`#${tag}`)));
+  footer.appendChild(tags);
+  card.append(top,title,desc,outcome,footer);
+  return card;
+}
+
+function renderPosts(){
+  const grid=document.getElementById('postsGrid');
+  if(!grid)return;
+  const posts=getFilteredPosts();
+  const result=document.getElementById('resultCount');
+  if(result)result.textContent=`${posts.length} 篇`;
+  grid.replaceChildren();
+  if(!posts.length){
+    const empty=create('div','empty-state');
+    empty.append(create('h3','', '没有找到匹配的文章'),create('p','', '尝试更换关键词或选择其他专题。'));
+    grid.appendChild(empty);
     return;
   }
+  const fragment=document.createDocumentFragment();
+  posts.forEach(post=>fragment.appendChild(buildPostCard(post)));
+  grid.appendChild(fragment);
+}
 
-  grid.innerHTML = posts.map((p, i) => {
-    const color = catColor(p.category);
-    const tags = p.tags.slice(0, 3).map(t => `<span class="tag">#${t}</span>`).join('');
-    return `
-    <a class="post-card" href="/post/${p.slug}">
-      <div class="card-banner" style="background: linear-gradient(90deg, ${color}, ${color}88)"></div>
-      <div class="card-body">
-        <div class="card-meta">
-          <span class="category-badge" style="background:${color}">${p.category}</span>
-          <span class="read-time">☕ ${p.read_minutes} min</span>
-        </div>
-        <h3 class="card-title">${p.title}</h3>
-        <p class="card-desc">${p.description}</p>
-      </div>
-      <div class="card-footer">
-        <span class="card-date">${p.date}</span>
-        <div class="card-tags">${tags}</div>
-      </div>
-    </a>`;
-  }).join('');
-
-  // Observe newly added cards for scroll animations
-  document.querySelectorAll('.post-card').forEach((card, index) => {
-    // Add staggered delay for the initial batch of cards
-    if (index < 12) card.style.transitionDelay = `${index * 40}ms`;
-    observer.observe(card);
+function initSearch(){
+  const input=document.getElementById('searchInput');
+  if(!input)return;
+  let frame=0;
+  input.addEventListener('input',event=>{
+    searchQuery=event.target.value;
+    cancelAnimationFrame(frame);
+    frame=requestAnimationFrame(renderPosts);
+  });
+  document.querySelectorAll('[data-category-link]').forEach(link=>{
+    link.addEventListener('click',()=>{
+      const category=link.dataset.categoryLink;
+      if(category){selectCategory(category);setTimeout(()=>document.getElementById('posts')?.scrollIntoView({block:'start'}),0)}
+    });
   });
 }
 
-// ─── Search ───────────────────────────────────────────────────────────────
-document.getElementById('searchInput').addEventListener('input', e => {
-  searchQuery = e.target.value;
-  renderCards();
-});
+function initReadingProgress(){
+  const bar=document.querySelector('[data-reading-progress]');
+  const article=document.querySelector('.article-content');
+  if(!bar||!article)return;
+  let scheduled=false;
+  const update=()=>{
+    const start=article.offsetTop;
+    const distance=Math.max(1,article.offsetHeight-window.innerHeight);
+    const progress=Math.min(1,Math.max(0,(window.scrollY-start)/distance));
+    bar.style.width=`${progress*100}%`;
+    scheduled=false;
+  };
+  window.addEventListener('scroll',()=>{if(!scheduled){scheduled=true;requestAnimationFrame(update)}},{passive:true});
+  update();
+}
 
-// ─── Navigate to post ────────────────────────────────────────────────────
-// Cards use <a href="/post/:slug"> — Rust backend serves the post HTML directly.
+function initToc(){
+  const toc=document.querySelector('[data-toc]');
+  const article=document.querySelector('.article-content');
+  if(!toc||!article)return;
+  [...article.querySelectorAll('h2,h3')].forEach((heading,index)=>{
+    if(!heading.id)heading.id=`section-${index+1}`;
+    const link=create('a',heading.tagName==='H3'?'toc-sub':'',heading.textContent);
+    link.href=`#${heading.id}`;
+    toc.appendChild(link);
+  });
+}
 
-// ─── Init ─────────────────────────────────────────────────────────────────
-loadPosts();
+function initCodeCopy(){
+  document.querySelectorAll('.article-content pre').forEach(pre=>{
+    const button=create('button','copy-btn','复制');
+    button.type='button';
+    button.addEventListener('click',async()=>{
+      try{await navigator.clipboard.writeText(pre.innerText.replace(/^复制\n?/,''));button.textContent='已复制';setTimeout(()=>button.textContent='复制',1200)}
+      catch(e){button.textContent='复制失败'}
+    });
+    pre.appendChild(button);
+  });
+}
+
+function init(){
+  initTheme();renderStats();renderCategories();initSearch();renderPosts();initReadingProgress();initToc();initCodeCopy();
+  const year=document.getElementById('year');
+  if(year)year.textContent=String(new Date().getFullYear());
+}
+
+document.addEventListener('DOMContentLoaded',init,{once:true});

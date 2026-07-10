@@ -1,0 +1,18 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Redis 缓存一致性的竞态分析与工程兜底。"><link rel="stylesheet" href="/style.css"><script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||((matchMedia('(prefers-color-scheme:light)').matches)?'light':'dark')}catch(e){}</script><script src="/app.js" defer></script><title>缓存一致性不是一道八股题</title></head><body><div class="reading-progress" data-reading-progress></div><header class="site-header"><nav class="nav-shell"><a class="brand" href="/"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a><div class="nav-links"><a href="/#posts">文章</a><a href="/categories/">专题</a><button class="icon-btn" id="themeBtn" type="button">◐</button></div></nav></header><main class="article-layout"><article><header class="article-header"><p class="eyebrow">数据与性能</p><h1>缓存一致性不是一道八股题：从读写竞态到工程兜底</h1><p class="article-lead">不存在脱离业务的一套“标准答案”。先识别会出现什么竞态，再决定需要多强的一致性和多高的实现成本。</p><div class="article-meta"><span>2026-07-10</span><span>12 分钟</span><span>Redis · 一致性 · 并发</span></div></header><div class="article-content"><h2>一、缓存一致性到底在保护什么</h2><p>数据库是真实来源，缓存是派生副本。所谓一致性问题，本质是派生副本在一段时间内与真实来源不同。工程上需要回答的不是“能否绝对一致”，而是：</p><ul><li>旧数据最多允许存在多久？</li><li>哪些字段读旧值会造成资金、权限或库存风险？</li><li>读流量、写流量和热点程度如何？</li><li>是否接受短暂回源或缓存不可用？</li></ul><h2>二、推荐基线：更新数据库，提交后删除缓存</h2><pre><code>begin transaction
+update database
+commit
+
+delete cache</code></pre><p>相比“更新数据库后更新缓存”，删除缓存更简单：下一次读取会从数据库获得新值并回填，避免在写路径中重复实现对象组装逻辑。</p><div class="callout">删除必须发生在数据库事务提交之后。否则缓存被删后，另一个读请求可能读到尚未提交的旧数据库值，并把它重新写回缓存。</div><h2>三、最经典的旧值回填竞态</h2><ol><li>读请求 A 缓存未命中，开始查询数据库，读到旧值 V1。</li><li>写请求 B 更新数据库为 V2，并删除缓存。</li><li>A 查询完成，把 V1 回填到缓存。</li></ol><p>最终数据库是 V2，缓存却重新变成 V1。这个窗口并不常见，但在慢查询、热点键或写流量升高时可能被放大。</p><h2>四、不同兜底方案的边界</h2><h3>TTL：限制错误持续时间</h3><p>TTL 不是一致性方案，却是所有方案都应该具备的最后保险。它保证错误缓存不会永久存在。重要数据使用较短 TTL，稳定且构建昂贵的数据使用较长 TTL，并增加随机抖动避免集中失效。</p><h3>延迟双删：压缩旧值回填窗口</h3><pre><code>update database
+commit
+delete cache
+sleep(short delay)
+delete cache again</code></pre><p>第二次删除试图清理并发读请求回填的旧值。缺点是延迟难以准确估计，睡眠会占用执行资源，而且第二次删除仍可能失败。因此它更适合作为过渡性增强，而不是最终保证。</p><h3>删除失败重试：保护写后失效</h3><p>数据库更新成功但缓存删除失败时，旧值会持续到 TTL 到期。可以把删除事件写入本地消息表，与业务事务一起提交，再由异步任务可靠重试。</p><h3>订阅 binlog：把缓存失效从业务代码解耦</h3><p>通过 CDC 订阅数据库变更并删除缓存，可覆盖绕过应用服务的写入。但系统会引入消费延迟、顺序、重复事件和运维复杂度，依然需要幂等和监控。</p><h2>五、热点回填还要解决击穿</h2><p>缓存失效后，大量请求同时查数据库并回填，会形成缓存击穿。常见做法有互斥锁、逻辑过期和请求合并：</p><pre><code>value = cache.get(key)
+if value exists: return value
+
+if lock.tryAcquire(key):
+    value = database.query(key)
+    cache.set(key, value, ttl)
+    lock.release(key)
+    return value
+
+wait briefly and retry cache</code></pre><p>锁的粒度应落在具体缓存键，并设置超时，避免构建线程异常后形成永久阻塞。</p><h2>六、主从延迟会让“正确删除”也回填旧值</h2><p>如果写入主库后删除缓存，而回源查询走从库，从库可能尚未追上主库，读请求仍会拿到旧值并回填。关键写后读可临时走主库、等待 GTID，或在请求上下文中维持一段读主窗口。</p><h2>七、按业务等级选择方案</h2><table><thead><tr><th>场景</th><th>建议</th></tr></thead><tbody><tr><td>展示型数据</td><td>提交后删缓存 + 合理 TTL</td></tr><tr><td>高并发热点</td><td>基线方案 + 请求合并/逻辑过期</td></tr><tr><td>权限、库存等敏感数据</td><td>关键读取回源或版本校验，缩短缓存窗口</td></tr><tr><td>多写入口</td><td>CDC/binlog 失效 + 可靠消费</td></tr></tbody></table><h2>八、验收清单</h2><ul><li>缓存删除失败是否有指标、重试和死信处理？</li><li>TTL 是否带随机抖动？</li><li>热点键失效时数据库能否承受回源峰值？</li><li>主从延迟期间关键读是否会回填旧值？</li><li>能否通过版本号或更新时间识别缓存是否落后？</li></ul></div></article><aside class="article-aside"><nav class="toc"><strong>文章目录</strong><div data-toc></div></nav></aside></main></body></html>
