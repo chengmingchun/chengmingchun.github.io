@@ -1,0 +1,48 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="从状态机和事件循环理解 Promise 与 async/await。"><link rel="stylesheet" href="/style.css"><script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||((matchMedia('(prefers-color-scheme:light)').matches)?'light':'dark')}catch(e){}</script><script src="/app.js" defer></script><title>Promise 与 async/await：从状态机理解异步控制流</title></head><body><div class="reading-progress" data-reading-progress></div><header class="site-header"><nav class="nav-shell"><a class="brand" href="/"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a><div class="nav-links"><a href="/#posts">文章</a><a href="/categories/">专题</a><button class="icon-btn" id="themeBtn" type="button">◐</button></div></nav></header><main class="article-layout"><article><header class="article-header"><p class="eyebrow">基础与算法</p><h1>Promise 与 async/await：从状态机理解异步控制流</h1><p class="article-lead">不把 await 记成“等待结果”，而是理解它如何暂停当前 async 函数、让出调用栈，并在微任务中恢复后续执行。</p><div class="article-meta"><span>2026-07-10</span><span>11 分钟</span><span>JavaScript · Promise · 并发</span></div></header><div class="article-content"><h2>一、Promise 是一个只能单向迁移的状态机</h2><p>Promise 初始为 <code>pending</code>，之后只能迁移到 <code>fulfilled</code> 或 <code>rejected</code>，而且一旦完成就不能再次改变。</p><pre><code>pending -> fulfilled(value)
+pending -> rejected(reason)</code></pre><p><code>resolve</code> 并不总是立即变成 fulfilled。如果传入另一个 Promise，它会采用对方的最终状态。</p><h2>二、构造函数同步执行，回调异步执行</h2><pre><code>console.log('A');
+
+const promise = new Promise(resolve => {
+  console.log('B');
+  resolve('result');
+});
+
+promise.then(value => console.log('D', value));
+console.log('C');
+
+// A B C D result</code></pre><p>Promise 构造器里的函数在当前调用栈同步执行；<code>then</code> 注册的回调进入微任务队列，等当前栈清空后运行。</p><h2>三、then 返回新的 Promise</h2><p>链式调用成立，不是因为同一个 Promise 被不断修改，而是每个 <code>then</code> 都返回一个新 Promise：</p><pre><code>fetchUser()
+  .then(user => fetchOrders(user.id))
+  .then(orders => summarize(orders))
+  .catch(error => report(error));</code></pre><p>回调返回普通值，新 Promise 会 fulfilled；抛出异常或返回 rejected Promise，新 Promise 会 rejected；返回另一个 Promise，则等待它完成。</p><h2>四、async/await 是链式控制流的语法</h2><pre><code>async function loadSummary() {
+  const user = await fetchUser();
+  const orders = await fetchOrders(user.id);
+  return summarize(orders);
+}</code></pre><p><code>async</code> 函数总是返回 Promise。执行到 <code>await</code> 时，表达式先被转成 Promise；函数暂停，控制权回到调用方；Promise 完成后，函数剩余部分作为微任务继续执行。</p><div class="callout">await 暂停的是当前 async 函数，不会阻塞 JavaScript 线程，也不会阻止其他任务继续运行。</div><h2>五、串行和并发不能写混</h2><h3>错误的无依赖串行</h3><pre><code>const profile = await fetchProfile();
+const messages = await fetchMessages();
+const settings = await fetchSettings();</code></pre><p>三个请求互不依赖，却被逐个等待，总耗时接近三者之和。</p><h3>正确的并发启动</h3><pre><code>const [profile, messages, settings] = await Promise.all([
+  fetchProfile(),
+  fetchMessages(),
+  fetchSettings()
+]);</code></pre><p><code>Promise.all</code> 适合“全部成功才有意义”的任务；需要收集每个结果时使用 <code>Promise.allSettled</code>；只关心最快成功时使用 <code>Promise.any</code>。</p><h2>六、异常传播的真实边界</h2><pre><code>async function run() {
+  try {
+    return await riskyTask();
+  } catch (error) {
+    throw new Error('任务执行失败', { cause: error });
+  }
+}</code></pre><p><code>try/catch</code> 只能捕获被 await 的 rejection 和同步异常。启动一个 Promise 却不 await，也不 return，它的失败不会被当前 catch 接住。</p><pre><code>try {
+  riskyTask(); // 未 await，当前 catch 捕获不到后续 rejection
+} catch (error) {
+  // 不会执行
+}</code></pre><h2>七、并发数量也需要控制</h2><p>对一万个任务直接 <code>Promise.all</code> 可能瞬间打满连接池或下游接口。可以使用固定并发 worker：</p><pre><code>async function mapLimit(items, limit, worker) {
+  const results = new Array(items.length);
+  let cursor = 0;
+
+  async function runWorker() {
+    while (cursor < items.length) {
+      const index = cursor++;
+      results[index] = await worker(items[index]);
+    }
+  }
+
+  await Promise.all(Array.from({ length: limit }, runWorker));
+  return results;
+}</code></pre><h2>八、常见误区清单</h2><ul><li>在 <code>forEach</code> 中使用 async，却期待外层等待完成。</li><li>忘记 return Promise，导致链式流程提前结束。</li><li>把所有任务都 Promise.all，忽略并发上限。</li><li>catch 后吞掉异常，让上层误判成功。</li><li>把 await 当作线程阻塞，错误分析执行顺序。</li></ul><h2>九、快速判断方法</h2><p>阅读异步代码时，只需要持续问三件事：这个函数返回哪个 Promise？当前 await 暂停的是哪一层函数？多个任务是先全部启动还是逐个启动？大多数异步顺序问题都能由此还原。</p></div></article><aside class="article-aside"><nav class="toc"><strong>文章目录</strong><div data-toc></div></nav></aside></main></body></html>
