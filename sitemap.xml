@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://chengmingchun.github.io/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://chengmingchun.github.io/categories/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://chengmingchun.github.io/post/sql-performance-playbook/</loc><lastmod>2026-07-10</lastmod></url>
+  <url><loc>https://chengmingchun.github.io/post/cloud-order-state-machine/</loc><lastmod>2026-07-10</lastmod></url>
+  <url><loc>https://chengmingchun.github.io/post/redis-cache-consistency/</loc><lastmod>2026-07-10</lastmod></url>
+  <url><loc>https://chengmingchun.github.io/post/agentic-engineering/</loc><lastmod>2026-07-10</lastmod></url>
+  <url><loc>https://chengmingchun.github.io/post/javascript-async-guide/</loc><lastmod>2026-07-10</lastmod></url>
+  <url><loc>https://chengmingchun.github.io/post/engineering-review-method/</loc><lastmod>2026-07-10</lastmod></url>
+</urlset>
