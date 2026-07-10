@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#3157d5">
+  <meta name="description" content="用并发时间线理解缓存更新策略，并建立可靠重试、TTL、CDC 与版本校验的选择框架。">
+  <link rel="canonical" href="https://chengmingchun.github.io/post/redis-cache-consistency.html">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('site-theme')||((matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light')}catch(e){}</script>
+  <script src="/js/site.js" defer></script>
+  <title>缓存一致性不是一道八股题：从读写竞态到工程兜底 · 程明春的工程笔记</title>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header"><nav class="nav-shell" aria-label="主导航"><a class="brand" href="/"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a><button class="icon-button menu-button" type="button" data-menu-toggle aria-expanded="false" aria-label="展开导航">☰</button><div class="nav-links" data-nav><a href="/">首页</a><a href="/post/">文章</a><a href="/categories/">专题</a><a href="/about/">关于</a><button class="icon-button" type="button" data-theme-toggle aria-label="切换主题">☾</button></div></nav></header>
+<div class="reading-progress" data-reading-progress></div>
+<main id="main" class="article-shell">
+  <header class="article-header"><p class="eyebrow">分布式系统</p><h1>缓存一致性不是一道八股题：从读写竞态到工程兜底</h1><p class="article-summary">用并发时间线理解缓存更新策略，并建立可靠重试、TTL、CDC 与版本校验的选择框架。</p><div class="article-meta"><span>更新于 2026-07-10</span><span>约 11 分钟</span><span>程明春</span></div></header>
+  <nav class="toc" aria-label="文章目录"><strong>本文目录</strong><ol><li><a href="#model">先建立一致性模型</a></li><li><a href="#race">三个典型竞态</a></li><li><a href="#strategy">策略如何选择</a></li><li><a href="#hardening">工程兜底</a></li><li><a href="#interview">表达模板</a></li></ol></nav>
+  <article class="article-body">
+<p>缓存一致性常被简化成一句“先更新数据库，再删除缓存”。这句话通常是合理默认值，但它不是数学上的强一致，也无法独立解决删除失败、旧值回填、主从延迟和并发写覆盖。</p>
+<h2 id="model">一、先建立模型：你需要的到底是哪种一致性</h2>
+<p>大多数业务缓存追求的是最终一致：数据库是事实源，缓存允许在短窗口内陈旧，但必须能自动收敛。真正要求读后写强一致的场景，应考虑绕过缓存、版本校验或在同一串行化边界内处理，而不是不断叠加“双删”。</p>
+<pre><code>read:  cache hit → return
+       cache miss → query DB → fill cache → return
+
+write: update DB → transaction commit → delete cache</code></pre>
+<h2 id="race">二、三个必须会画时间线的竞态</h2>
+<h3>竞态 A：先删缓存，再更新数据库</h3><p>写线程删除缓存后尚未提交数据库，读线程 miss，读取旧数据库值并回填缓存；随后写线程提交，新数据库值与旧缓存长期不一致。因此“先删后改”不适合作为默认顺序。</p>
+<h3>竞态 B：先更新数据库，再删缓存，但删除失败</h3><p>顺序正确也可能因为网络抖动、Redis 超时或进程崩溃导致删除失败。此时旧缓存会一直存在，除非 TTL 到期或有可靠重试。删除动作必须被当成可失败的外部副作用。</p>
+<h3>竞态 C：缓存 miss 的慢查询覆盖新值</h3><p>读线程先查到旧值，但回填很慢；写线程已更新数据库并删除缓存；读线程最后把旧值写回。这是“旧值回填”问题，发生概率低，但在慢查询、热点键或大对象序列化时会放大。</p>
+<h2 id="strategy">三、常见策略分别解决什么</h2>
+<div class="table-wrap"><table><thead><tr><th>策略</th><th>解决的问题</th><th>局限</th></tr></thead><tbody><tr><td>更新 DB 后删缓存</td><td>降低先删后改的旧值回填概率</td><td>删除仍可能失败</td></tr><tr><td>TTL</td><td>保证错误不会永久存在</td><td>只能限制不一致上界</td></tr><tr><td>删除重试 / 事务消息</td><td>处理删除失败</td><td>需要幂等和死信治理</td></tr><tr><td>延迟双删</td><td>降低并发读回填旧值概率</td><td>延迟时间难精确，不能替代可靠重试</td></tr><tr><td>Binlog / CDC</td><td>把缓存失效从业务事务中解耦</td><td>存在消费延迟和运维成本</td></tr><tr><td>版本号 / CAS</td><td>阻止旧版本覆盖新版本</td><td>读写协议更复杂</td></tr></tbody></table></div>
+<p>常规业务可采用“事务提交后删除 + TTL + 删除失败重试”。热点且不能容忍旧值回填时，再增加逻辑版本：只有待写入版本不小于当前缓存版本才允许覆盖。</p>
+<pre><code>// 伪代码：数据库提交成功后投递失效事件
+@Transactional
+public void updateOrder(Order order) {
+    orderRepository.update(order);
+    outboxRepository.append("ORDER_CACHE_EVICT", order.getId());
+}
+
+// 消费者重复执行 delete 是安全的
+public void consume(CacheEvictEvent event) {
+    redis.delete("order:" + event.id());
+}</code></pre>
+<h2 id="hardening">四、工程兜底：从正确顺序升级为可运营系统</h2>
+<ol><li><strong>事务后执行：</strong>缓存删除必须在数据库提交后触发，避免事务回滚却提前失效。</li><li><strong>可重试：</strong>使用本地消息表、事务消息或 CDC，记录失败次数与最后错误。</li><li><strong>可观测：</strong>监控缓存删除失败率、重试积压、热点键命中率与 DB 回源量。</li><li><strong>防击穿：</strong>热点键失效时使用单飞、互斥锁或逻辑过期，避免所有请求同时回源。</li><li><strong>限制缓存价值：</strong>不要把强一致核心数据只放在缓存中；缓存应该是派生数据。</li></ol>
+<h2 id="interview">五、面试或方案评审时怎么表达</h2>
+<blockquote>我们的事实源是数据库，目标是最终一致。写路径在事务提交后删除缓存，避免先删后改导致旧值回填；删除失败通过可靠事件重试，TTL 限制最坏不一致窗口。热点键再配合单飞和版本校验。若业务要求读后写强一致，关键读直接走主库或带版本读取，不把缓存方案包装成强一致。</blockquote>
+<p>这套表达的关键是：先说一致性目标，再说主流程，然后主动暴露竞态和兜底，而不是背出“延迟双删”四个字。</p>
+  </article>
+</main>
+<footer class="site-footer"><div class="footer-shell"><span>© <span data-year>2026</span> 程明春 · 把经验整理成可复用的方法。</span><span><a href="https://github.com/chengmingchun" rel="me">GitHub</a> · 静态站点，无追踪脚本</span></div></footer>
+</body>
+</html>

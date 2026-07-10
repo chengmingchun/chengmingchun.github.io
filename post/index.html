@@ -1,141 +1,43 @@
-<!DOCTYPE html>
-<html lang="zh-CN"><head>
-    <title>神威空间</title>
-    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-    <meta content="utf-8" http-equiv="encoding">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="theme-color" content="#000084" />
-    <link rel="icon" href="/favicon.ico">
-    <link rel="canonical" href="">
-    
-    
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#3157d5">
+  <meta name="description" content="系统设计、数据库性能、分布式一致性与 AI 工程化文章归档。">
+  <link rel="canonical" href="https://chengmingchun.github.io/post/">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/style.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('site-theme')||((matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light')}catch(e){}</script>
+  <script src="/js/site.js" defer></script>
+  <title>文章 · 程明春的工程笔记</title>
 </head>
 <body>
-<nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse"></button>
-            <a class="brand" href="">神威空间</a>
-            <div class="nav-collapse collapse">
-                <ul class="nav">
-                    
-                    
-                        
-                            <li>
-                                <a href="/about/">
-                                    
-                                    <span>个人简历</span>
-                                </a>
-                            </li>
-                        
-                    
-                        
-                            <li>
-                                <a href="/post/">
-                                    
-                                    <span>文章</span>
-                                </a>
-                            </li>
-                        
-                    
-                        
-                            <li>
-                                <a href="/post/">
-                                    
-                                    <span>demo</span>
-                                </a>
-                            </li>
-                        
-                    
-                        
-                            <li>
-                                <a href="/post/">
-                                    
-                                    <span>照片墙</span>
-                                </a>
-                            </li>
-                        
-                    
-                </ul>
-            </div>
-        </div>
+<a class="skip-link" href="#main">跳到正文</a>
+<header class="site-header">
+  <nav class="nav-shell" aria-label="主导航">
+    <a class="brand" href="/"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a>
+    <button class="icon-button menu-button" type="button" data-menu-toggle aria-expanded="false" aria-label="展开导航">☰</button>
+    <div class="nav-links" data-nav>
+      <a href="/">首页</a><a href="/post/">文章</a><a href="/categories/">专题</a><a href="/about/">关于</a>
+      <button class="icon-button" type="button" data-theme-toggle aria-label="切换主题">☾</button>
     </div>
-</nav><div id="content" class="container">
-<article class="row-fluid navmargin">
-    <header class="page-header">
-        <h1>Posts</h1>
-    </header>
-    
-    
-</article>
-<ul>
-
-
-    <li>
-        <a href="/post/%E5%AE%9E%E4%B9%A0%E5%AD%A6%E5%88%B0%E7%9A%84%E4%B8%9C%E8%A5%BF/">2020-08-27 | 实习小结</a>
-    </li>
-
-    <li>
-        <a href="/post/%E5%8D%9A%E5%AE%A2%E8%AF%B4%E6%98%8E/">2020-08-27 | 博客说明</a>
-    </li>
-
-</ul>
-
-        </div><footer class="container">
-    <hr class="soften">
-    <p>
-
-    <a href="https://gitlab.com/maxlefou/hugo.386">theme by Max le Fou</a> | 
-
-&copy; 
-<a href="%20" target="_blank">
-    cmc
-</a>
-<span id="thisyear">2020</span>
-
-    | waiting
-
-
-        |  <a href="//gohugo.io" target="_blank">Hugo</a>
-</p>
-    <p class="text-center">
-        
-        
-        
-        <a href="%20">GitHub</a> 
-        <a href="https://gitee.com/cheng-mingchun">Gitee</a>
-    </p>
-</footer>
-
-</body><link rel="stylesheet" href="/css/bootstrap.css">
-<link rel="stylesheet" href="/css/bootstrap-responsive.css">
-<link rel="stylesheet" href="/css/style.css">
-
-<script src="/js/jquery.js"></script>
-<script src="/js/bootstrap-386.js"></script>
-<script src="/js/bootstrap-transition.js"></script>
-<script src="/js/bootstrap-alert.js"></script>
-<script src="/js/bootstrap-modal.js"></script>
-<script src="/js/bootstrap-dropdown.js"></script>
-<script src="/js/bootstrap-scrollspy.js"></script>
-<script src="/js/bootstrap-tab.js"></script>
-<script src="/js/bootstrap-tooltip.js"></script>
-<script src="/js/bootstrap-popover.js"></script>
-<script src="/js/bootstrap-button.js"></script>
-<script src="/js/bootstrap-collapse.js"></script>
-<script src="/js/bootstrap-carousel.js"></script>
-<script src="/js/bootstrap-typeahead.js"></script>
-<script src="/js/bootstrap-affix.js"></script>
-<script>
-    _386 = { 
-        fastLoad: false ,
-        onePass: true , 
-        speedFactor: 4 
-    };
-
-    
-    function ThisYear() {
-        document.getElementById('thisyear').innerHTML = new Date().getFullYear();
-    };
-</script></html>
+  </nav>
+</header>
+<main id="main" class="page-shell">
+  <header class="page-heading"><p class="eyebrow">All articles</p><h1>工程文章</h1><p>文章按“问题域”而不是技术名词分类。每篇尽量回答：为什么发生、如何定位、方案如何取舍、怎样验证。</p></header>
+  <section class="section" style="padding-top:0">
+    <div class="filters"><label><span class="skip-link">搜索文章</span><input class="search-input" type="search" placeholder="搜索标题、摘要或技术关键词…" data-post-search></label><div class="filter-buttons" aria-label="文章分类"><button class="filter-button is-active" data-filter="all">全部</button><button class="filter-button" data-filter="system-design">系统设计</button><button class="filter-button" data-filter="data-performance">数据与性能</button><button class="filter-button" data-filter="ai-engineering">AI 工程化</button><button class="filter-button" data-filter="foundations">基础与算法</button></div></div>
+    <div class="article-grid">
+      <a class="article-card" data-post-card data-category="data-performance" href="/post/sql-performance-playbook.html"><div class="meta"><span>数据库与性能</span><span>2026-07-10</span><span>12 分钟</span></div><h3>从 49 秒到 0.9 秒：复杂 SQL 性能排查方法论</h3><p>从现象到执行计划，再到索引、排序、回表和分页的完整排查路径。</p><span class="read-more">阅读全文 →</span></a>
+      <a class="article-card" data-post-card data-category="system-design" href="/post/cloud-order-state-machine.html"><div class="meta"><span>系统设计</span><span>2026-07-10</span><span>14 分钟</span></div><h3>云资源订单系统：状态机、幂等、重试与补偿如何协作</h3><p>如何设计可恢复、可观测的异步资源编排流程。</p><span class="read-more">阅读全文 →</span></a>
+      <a class="article-card" data-post-card data-category="data-performance" href="/post/redis-cache-consistency.html"><div class="meta"><span>分布式系统</span><span>2026-07-10</span><span>11 分钟</span></div><h3>缓存一致性不是一道八股题：从读写竞态到工程兜底</h3><p>用时间线推导缓存更新策略的正确性与边界。</p><span class="read-more">阅读全文 →</span></a>
+      <a class="article-card" data-post-card data-category="ai-engineering" href="/post/agentic-engineering.html"><div class="meta"><span>AI 工程化</span><span>2026-07-10</span><span>13 分钟</span></div><h3>Agentic 研发系统如何收敛：任务图、证据链与质量门禁</h3><p>多 Agent 协作的状态、职责、恢复与验收设计。</p><span class="read-more">阅读全文 →</span></a>
+      <a class="article-card" data-post-card data-category="foundations" href="/post/javascript-async-guide.html"><div class="meta"><span>JavaScript 基础</span><span>2020-08-27</span><span>10 分钟</span></div><h3>Promise 与 async/await：从状态机理解异步控制流</h3><p>重写旧笔记：补齐微任务、错误传播、并发控制和常见误区。</p><span class="read-more">阅读全文 →</span></a>
+    </div>
+    <div class="empty-state" data-empty-state>没有匹配的文章，换一个关键词试试。</div>
+  </section>
+</main>
+<footer class="site-footer"><div class="footer-shell"><span>© <span data-year>2026</span> 程明春 · 把经验整理成可复用的方法。</span><span><a href="https://github.com/chengmingchun" rel="me">GitHub</a> · 静态站点，无追踪脚本</span></div></footer>
+</body>
+</html>
