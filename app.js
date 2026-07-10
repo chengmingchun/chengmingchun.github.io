@@ -8,27 +8,42 @@ const POSTS=[
 ];
 
 const CATEGORY_ORDER=['全部','系统设计','数据与性能','AI 工程化','基础与算法','工程复盘'];
+const CATEGORY_COLORS={'系统设计':'#a855f7','数据与性能':'#06b6d4','AI 工程化':'#8b5cf6','基础与算法':'#22c55e','工程复盘':'#ec4899'};
 let activeCategory='全部';
 let searchQuery='';
-
-function initTheme(){
-  const root=document.documentElement;
-  const button=document.getElementById('themeBtn');
-  const current=root.dataset.theme||'dark';
-  if(button)button.textContent=current==='dark'?'☾':'☀';
-  button?.addEventListener('click',()=>{
-    const next=root.dataset.theme==='dark'?'light':'dark';
-    root.dataset.theme=next;
-    button.textContent=next==='dark'?'☾':'☀';
-    try{localStorage.setItem('theme',next)}catch(e){}
-  });
-}
 
 function create(tag,className,text){
   const node=document.createElement(tag);
   if(className)node.className=className;
   if(text!==undefined)node.textContent=text;
   return node;
+}
+
+function initTheme(){
+  const root=document.documentElement;
+  const button=document.getElementById('themeBtn');
+  const current=root.dataset.theme||'dark';
+  if(button)button.textContent=current==='dark'?'🌙':'☀️';
+  button?.addEventListener('click',()=>{
+    const next=root.dataset.theme==='dark'?'light':'dark';
+    root.dataset.theme=next;
+    button.textContent=next==='dark'?'🌙':'☀️';
+    try{localStorage.setItem('theme',next)}catch(e){}
+  });
+}
+
+function initHeroTyping(){
+  const target=document.getElementById('typing-text');
+  if(!target)return;
+  const text='Think. Code. Iterate.';
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){target.textContent=text;return;}
+  target.textContent='';
+  let index=0;
+  const type=()=>{
+    target.textContent=text.slice(0,++index);
+    if(index<text.length)setTimeout(type,index<7?74:54);
+  };
+  requestAnimationFrame(type);
 }
 
 function renderStats(){
@@ -41,9 +56,8 @@ function renderStats(){
 function renderCategories(){
   const container=document.getElementById('catChips');
   if(!container)return;
-  const available=new Set(POSTS.map(post=>post.category));
   container.replaceChildren();
-  CATEGORY_ORDER.filter(cat=>cat==='全部'||available.has(cat)).forEach(category=>{
+  CATEGORY_ORDER.forEach(category=>{
     const button=create('button','cat-chip'+(category===activeCategory?' active':''),category);
     button.type='button';
     button.dataset.category=category;
@@ -73,11 +87,16 @@ function getFilteredPosts(){
 }
 
 function buildPostCard(post){
+  const color=CATEGORY_COLORS[post.category]||'#6366f1';
   const card=create('a','post-card');
   card.href=`/post/${post.slug}/`;
+  card.style.setProperty('--card-color',color);
   card.setAttribute('aria-label',`阅读：${post.title}`);
-  const top=create('div','card-top');
-  top.append(create('span','category-badge',post.category),create('span','read-time',`${post.read_minutes} 分钟`));
+
+  const banner=create('div','card-banner');
+  const body=create('div','card-body');
+  const meta=create('div','card-meta');
+  meta.append(create('span','category-badge',post.category),create('span','read-time',`☕ ${post.read_minutes} min`));
   const title=create('h3','card-title',post.title);
   const desc=create('p','card-desc',post.description);
   const outcome=create('p','card-outcome',post.outcome);
@@ -86,7 +105,8 @@ function buildPostCard(post){
   const tags=create('div','card-tags');
   post.tags.forEach(tag=>tags.appendChild(create('span','tag',`#${tag}`)));
   footer.appendChild(tags);
-  card.append(top,title,desc,outcome,footer);
+  body.append(meta,title,desc,outcome,footer);
+  card.append(banner,body);
   return card;
 }
 
@@ -99,7 +119,7 @@ function renderPosts(){
   grid.replaceChildren();
   if(!posts.length){
     const empty=create('div','empty-state');
-    empty.append(create('h3','', '没有找到匹配的文章'),create('p','', '尝试更换关键词或选择其他专题。'));
+    empty.append(create('h3','', '没有找到匹配的文章'),create('p','', '换个关键词，或者选择其他知识领域。'));
     grid.appendChild(empty);
     return;
   }
@@ -110,17 +130,21 @@ function renderPosts(){
 
 function initSearch(){
   const input=document.getElementById('searchInput');
-  if(!input)return;
-  let frame=0;
-  input.addEventListener('input',event=>{
-    searchQuery=event.target.value;
-    cancelAnimationFrame(frame);
-    frame=requestAnimationFrame(renderPosts);
-  });
+  if(input){
+    let frame=0;
+    input.addEventListener('input',event=>{
+      searchQuery=event.target.value;
+      cancelAnimationFrame(frame);
+      frame=requestAnimationFrame(renderPosts);
+    });
+  }
   document.querySelectorAll('[data-category-link]').forEach(link=>{
     link.addEventListener('click',()=>{
       const category=link.dataset.categoryLink;
-      if(category){selectCategory(category);setTimeout(()=>document.getElementById('posts')?.scrollIntoView({block:'start'}),0)}
+      if(category){
+        selectCategory(category);
+        setTimeout(()=>document.getElementById('articles')?.scrollIntoView({block:'start'}),0);
+      }
     });
   });
 }
@@ -158,7 +182,7 @@ function initCodeCopy(){
     const button=create('button','copy-btn','复制');
     button.type='button';
     button.addEventListener('click',async()=>{
-      try{await navigator.clipboard.writeText(pre.innerText.replace(/^复制\n?/,''));button.textContent='已复制';setTimeout(()=>button.textContent='复制',1200)}
+      try{await navigator.clipboard.writeText(pre.querySelector('code')?.innerText||pre.innerText);button.textContent='已复制';setTimeout(()=>button.textContent='复制',1200)}
       catch(e){button.textContent='复制失败'}
     });
     pre.appendChild(button);
@@ -166,7 +190,15 @@ function initCodeCopy(){
 }
 
 function init(){
-  initTheme();renderStats();renderCategories();initSearch();renderPosts();initReadingProgress();initToc();initCodeCopy();
+  initTheme();
+  initHeroTyping();
+  renderStats();
+  renderCategories();
+  initSearch();
+  renderPosts();
+  initReadingProgress();
+  initToc();
+  initCodeCopy();
   const year=document.getElementById('year');
   if(year)year.textContent=String(new Date().getFullYear());
 }
