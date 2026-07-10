@@ -1,81 +1,88 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b1020">
-  <meta name="description" content="程明春的工程笔记：系统设计、数据性能、AI 工程化、基础算法与工程复盘。">
+  <meta name="theme-color" content="#0a0a13">
+  <meta name="description" content="程明春的工程笔记：记录系统设计、数据性能、AI 工程化、基础算法与工程复盘。">
   <link rel="canonical" href="https://chengmingchun.github.io/">
   <link rel="stylesheet" href="/style.css">
-  <script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||((matchMedia('(prefers-color-scheme:light)').matches)?'light':'dark')}catch(e){}</script>
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('theme')||'dark'}catch(e){}</script>
   <script src="/app.js" defer></script>
-  <title>程明春的工程笔记</title>
+  <title>Spring's Blog · 程明春的工程笔记</title>
 </head>
-<body>
-  <a class="skip-link" href="#main">跳到正文</a>
-  <header class="site-header">
-    <nav class="nav-shell" aria-label="主导航">
-      <a class="brand" href="/" aria-label="返回首页"><span class="brand-mark">CMC</span><span>程明春的工程笔记</span></a>
-      <div class="nav-links">
-        <a href="#posts">文章</a><a href="/categories/">专题</a><a href="#method">写作方法</a>
-        <button class="icon-btn" id="themeBtn" type="button" aria-label="切换主题">◐</button>
+<body class="home-page">
+  <a class="skip-link" href="#articles">跳到文章</a>
+
+  <section class="hero" aria-labelledby="hero-title">
+    <nav class="hero-nav" aria-label="主导航">
+      <a class="hero-brand" href="/"><span class="brand-orb">CMC</span><span>Spring's Blog</span></a>
+      <div class="hero-links">
+        <a href="#knowledge">知识地图</a>
+        <a href="#articles">文章</a>
+        <a href="https://github.com/chengmingchun">GitHub</a>
       </div>
     </nav>
-  </header>
 
-  <main id="main">
-    <section class="hero page-shell">
-      <div class="hero-copy">
-        <p class="eyebrow">ENGINEERING NOTES · 持续更新</p>
-        <h1>把零散经验，整理成<br><span class="gradient-text">可以复用的工程方法。</span></h1>
-        <p class="hero-sub">不只记录“怎么做”，更回答为什么这样设计、方案在哪些边界失效，以及如何验证它真的有效。</p>
-        <div class="hero-actions"><a class="button primary" href="#posts">开始阅读</a><a class="button ghost" href="/categories/">查看知识地图</a></div>
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-content">
+      <div class="hero-tag"><span class="status-dot"></span> ENGINEERING NOTES · ONLINE</div>
+      <h1 id="hero-title"><span class="grad" id="typing-text">Think. Code. Iterate.</span></h1>
+      <p class="hero-sub">
+        记录 Rust · 算法 · 系统设计 · AI 工程化的思考与实践。<br>
+        不只写“怎么做”，也写清楚系统为什么这样运行。
+      </p>
+      <div class="hero-actions">
+        <a class="hero-button primary" href="#articles">开始阅读 <span>↓</span></a>
+        <a class="hero-button" href="/categories/">探索知识地图</a>
       </div>
-      <aside class="hero-panel" aria-label="博客方向">
-        <div class="signal"><span class="signal-dot"></span>内容导向，而不是动画导向</div>
-        <dl class="hero-metrics">
-          <div><dt id="stat-posts">6</dt><dd>篇深度文章</dd></div>
-          <div><dt id="stat-categories">5</dt><dd>个专题方向</dd></div>
-          <div><dt id="stat-hours">2</dt><dd>小时系统阅读</dd></div>
-        </dl>
-        <p>当前主线：系统设计、数据库与缓存、Agentic 研发、Java/Rust/算法基础。</p>
-      </aside>
+      <div class="hero-stats" aria-label="博客统计">
+        <div class="stat"><div class="stat-num" id="stat-posts">6</div><div class="stat-label">篇深度文章</div></div>
+        <div class="stat"><div class="stat-num" id="stat-categories">5</div><div class="stat-label">个知识领域</div></div>
+        <div class="stat"><div class="stat-num" id="stat-hours">2</div><div class="stat-label">小时系统阅读</div></div>
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true"><span></span>SCROLL TO EXPLORE</div>
+  </section>
+
+  <div class="toolbar" id="toolbar">
+    <a class="toolbar-brand" href="#"><span class="brand-orb small">CMC</span><span>Spring's Blog</span></a>
+    <label class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg>
+      <input id="searchInput" type="search" placeholder="搜索文章标题、摘要或标签…" autocomplete="off">
+    </label>
+    <div class="categories" id="catChips" aria-label="文章分类"></div>
+    <a class="map-link" href="/categories/">知识地图</a>
+    <button class="theme-btn" id="themeBtn" type="button" title="切换主题" aria-label="切换主题">🌙</button>
+  </div>
+
+  <main class="main" id="mainSection">
+    <section class="knowledge-section main-inner" id="knowledge" aria-labelledby="knowledge-title">
+      <div class="section-kicker">KNOWLEDGE GRAPH</div>
+      <div class="section-head knowledge-head">
+        <div><h2 class="section-title" id="knowledge-title">五条工程学习主线</h2><p>分类不是标签堆叠，而是从问题出发的导航系统。</p></div>
+        <a href="/categories/">查看完整地图 →</a>
+      </div>
+      <div class="knowledge-grid">
+        <a class="knowledge-card" href="#articles" data-category-link="系统设计"><span>01 / ARCH</span><h3>系统设计</h3><p>状态机、幂等、异步任务、重试补偿与可观测性。</p></a>
+        <a class="knowledge-card" href="#articles" data-category-link="数据与性能"><span>02 / DATA</span><h3>数据与性能</h3><p>SQL、索引、Redis、一致性、复制延迟与性能排障。</p></a>
+        <a class="knowledge-card" href="#articles" data-category-link="AI 工程化"><span>03 / AI</span><h3>AI 工程化</h3><p>Agent、RAG、MCP、任务图、证据链与质量门禁。</p></a>
+        <a class="knowledge-card" href="#articles" data-category-link="基础与算法"><span>04 / CORE</span><h3>基础与算法</h3><p>并发、JVM、Rust、数据结构与复杂度思维。</p></a>
+        <a class="knowledge-card" href="#articles" data-category-link="工程复盘"><span>05 / REVIEW</span><h3>工程复盘</h3><p>从故障现场提炼可以迁移的判断框架与系统防线。</p></a>
+      </div>
     </section>
 
-    <section class="topic-strip page-shell" aria-labelledby="topics-title">
-      <div class="section-heading"><div><p class="eyebrow">KNOWLEDGE MAP</p><h2 id="topics-title">按问题域组织，而不是按技术名词堆放</h2></div><a href="/categories/">完整专题 →</a></div>
-      <div class="topic-grid">
-        <a class="topic-card" href="#posts" data-category-link="系统设计"><span>01</span><h3>系统设计</h3><p>状态机、幂等、异步任务、重试补偿与可观测性。</p></a>
-        <a class="topic-card" href="#posts" data-category-link="数据与性能"><span>02</span><h3>数据与性能</h3><p>SQL、索引、Redis、一致性、主从延迟与排障方法。</p></a>
-        <a class="topic-card" href="#posts" data-category-link="AI 工程化"><span>03</span><h3>AI 工程化</h3><p>Agent、RAG、MCP、任务图、证据链与质量门禁。</p></a>
-        <a class="topic-card" href="#posts" data-category-link="基础与算法"><span>04</span><h3>基础与算法</h3><p>并发、JVM、Rust、数据结构与算法思维。</p></a>
-        <a class="topic-card" href="#posts" data-category-link="工程复盘"><span>05</span><h3>工程复盘</h3><p>从故障现场提炼可迁移的判断框架与检查清单。</p></a>
+    <section class="articles-section main-inner" id="articles" aria-labelledby="articles-title">
+      <div class="section-kicker">LATEST WRITING</div>
+      <div class="section-head">
+        <div><h2 class="section-title" id="articles-title">全部文章</h2><p>每篇文章都包含机制、边界、取舍和验证方法。</p></div>
+        <span class="result-count" id="resultCount">6 篇</span>
       </div>
-    </section>
-
-    <section class="posts-section" id="posts">
-      <div class="page-shell">
-        <div class="section-heading"><div><p class="eyebrow">ARTICLES</p><h2>深度文章</h2></div><span class="result-count" id="resultCount">6 篇</span></div>
-        <div class="toolbar" aria-label="文章筛选">
-          <label class="search-wrap"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="搜索标题、摘要或标签" autocomplete="off"></label>
-          <div class="categories" id="catChips" aria-label="文章分类"></div>
-        </div>
-        <div class="posts-grid" id="postsGrid"></div>
-        <noscript><p class="empty-state">请启用 JavaScript 以使用文章筛选。文章仍可从专题页访问。</p></noscript>
-      </div>
-    </section>
-
-    <section class="method page-shell" id="method">
-      <div class="section-heading"><div><p class="eyebrow">WRITING STANDARD</p><h2>一篇文章至少解决四件事</h2></div></div>
-      <div class="method-grid">
-        <article><strong>01</strong><h3>还原问题</h3><p>明确现象、约束、数据规模和错误假设，避免只给结论。</p></article>
-        <article><strong>02</strong><h3>解释机制</h3><p>用状态流、时序或执行计划说明系统为什么会这样运行。</p></article>
-        <article><strong>03</strong><h3>比较方案</h3><p>说明收益、成本、适用边界，以及为什么不选其他方案。</p></article>
-        <article><strong>04</strong><h3>给出验证</h3><p>用指标、日志、测试或检查清单证明改动确实生效。</p></article>
-      </div>
+      <div class="posts-grid" id="postsGrid"></div>
+      <noscript><div class="empty-state"><h3>请启用 JavaScript</h3><p>也可以直接从 <a href="/categories/">专题知识地图</a> 访问全部文章。</p></div></noscript>
     </section>
   </main>
 
-  <footer class="site-footer"><div class="page-shell"><p>© <span id="year"></span> 程明春 · 把实践沉淀成可复用的方法</p><a href="https://github.com/chengmingchun">GitHub</a></div></footer>
+  <footer class="site-footer"><div class="main-inner"><p>© <span id="year"></span> 程明春 · Think. Code. Iterate.</p><div><a href="/categories/">知识地图</a><a href="https://github.com/chengmingchun">GitHub</a></div></div></footer>
 </body>
 </html>
